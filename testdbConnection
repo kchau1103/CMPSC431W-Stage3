@@ -1,0 +1,20 @@
+import mysql.connector
+
+try:
+    # MySQL database connection details
+    db_connection = mysql.connector.connect(
+        host='your_host',
+        user='your_username',
+        password='your_password',
+        database='your_database'
+    )
+
+    # Check if connection is successful
+    if db_connection.is_connected():
+        print("Connected to the database!")
+
+    # Close the connection
+    db_connection.close()
+
+except mysql.connector.Error as e:
+    print(f"Error connecting to the database: {e}")
