@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS Payment;
 CREATE TABLE Payment (
     payment_id INT AUTO_INCREMENT PRIMARY KEY,
     registration_status VARCHAR(50),
@@ -8,6 +9,7 @@ CREATE TABLE Payment (
     FOREIGN KEY (studio_name) REFERENCES Studio(studio_name)
 );
 
+DROP TABLE IF EXISTS Set_List;
 CREATE TABLE Set_List (
     entry_num INT AUTO_INCREMENT PRIMARY KEY,
     studio_name VARCHAR(100),
@@ -20,12 +22,14 @@ CREATE TABLE Set_List (
     FOREIGN KEY (studio_name) REFERENCES Studio(studio_name)
 );
 
+DROP TABLE IF EXISTS Studio;
 CREATE TABLE Studio (
     studio_name VARCHAR(100) PRIMARY KEY,
     city VARCHAR(100),
     state VARCHAR(100)
 );
 
+DROP TABLE IF EXISTS Schedule;
 CREATE TABLE Schedule (
     order_num INT AUTO_INCREMENT PRIMARY KEY,
     date DATE,
@@ -34,6 +38,7 @@ CREATE TABLE Schedule (
     FOREIGN KEY (song) REFERENCES Set_List(entry_num)
 );
 
+DROP TABLE IF EXISTS Dancer;
 CREATE TABLE Dancer (
     studio_name VARCHAR(100),
     name VARCHAR(100),
@@ -45,6 +50,7 @@ CREATE TABLE Dancer (
     FOREIGN KEY (order_num) REFERENCES Schedule(order_num)
 );
 
+DROP TABLE IF EXISTS Piece;
 CREATE TABLE Piece (
     order_num INT,
     studio_name VARCHAR(100),
@@ -60,6 +66,7 @@ CREATE TABLE Piece (
     FOREIGN KEY (award_name) REFERENCES Adjudication(award_name)
 );
 
+DROP TABLE IF EXISTS Judges_Score;
 CREATE TABLE Judges_Score (
     order_num INT,
     judge_id INT,
@@ -68,6 +75,7 @@ CREATE TABLE Judges_Score (
     FOREIGN KEY (order_num) REFERENCES Piece(order_num)
 );
 
+DROP TABLE IF EXISTS Adjudication;
 CREATE TABLE Adjudication (
     award_name INT AUTO_INCREMENT PRIMARY KEY,
     order_num INT,

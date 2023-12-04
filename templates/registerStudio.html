@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--CSS Styles -->
-    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
     <!-- Animate CSS CDN -->
     <link
@@ -29,27 +29,27 @@
     <nav>
       <body style="background-color:rgb(0, 0, 0);"></body>
       <h1>
-        <a href="file:///Users/kellychau/Desktop/stage3/home.html">Starstruck Dance Competition</a>
+        <a href="/">Starstruck Dance Competition</a>
       </h1>
 
       <ul class="navigation bar">
-        <a href="/Users/kellychau/Desktop/stage3/about.html" class="nav-link">About Us</a>
-        <a href="/Users/kellychau/Desktop/stage3/contact.html" class="nav-link">Contact</a>
-        <a href="/Users/kellychau/Desktop/stage3/register.html" class="nav-link">Register</a>
-        <a href="/Users/kellychau/Desktop/stage3/schedule.html" class="nav-link">Schedule</a>
-        <a href="/Users/kellychau/Desktop/stage3/login.html" class="nav-link">Login</a>
+        <a href="about" class="nav-link">About Us</a>
+        <a href="contact" class="nav-link">Contact</a>
+        <a href="register_studio" class="nav-link">Register</a>
+        <a href="schedule" class="nav-link">Schedule</a>
+        <a href="login" class="nav-link">Login</a>
       </ul>
     </nav>
 
   <section>
-    <form action="action_page.php">
+    <form action="/register_studio" method="post">
       <div class="container" style="color:rgb(255, 255, 255);">
-        <h1 style="color:rgb(255, 131, 208);">Register</h1>
+        <h1 style="color:rgb(255, 131, 208);">Register Studio</h1>
         <p>Please fill in this form to register your studio.</p>
         <hr>
     
         <label for="studio_name"><b>Studio Name</b></label>
-        <input type="text" placeholder="Enter Studio Name" name="email" id="email" required><br><br>
+        <input type="text" placeholder="Enter Studio Name" name="studio_name" required><br><br>
     
         <label for="state">State</label>
               <select id="state" name="state" style="width: 50%; margin-bottom: 10px;">
@@ -110,9 +110,9 @@
         <br><br>
 
     <button type="submit" style="font-size: 18px;">Submit</button>
-  
   </form>
-</section>
+
+  </section>
       <div class="container signin" style="color:rgb(255, 131, 208);">
         <p>Already registered? <a href="#">Login</a>.</p>
       </div>

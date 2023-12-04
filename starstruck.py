@@ -1,69 +1,193 @@
-from flask import Flask, render_template
-from database import insert_piece
+#import modules
+from flask import Flask, render_template, request, redirect, url_for, g, session, jsonify, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import timedelta
+import pandas as pd
+import sqlite3
+import hashlib
+import logging
 
-app = Flask(__name__)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+#create Flask instance and set template holder
+app = Flask(__name__, template_folder='templates')
+app.secret_key = 'secretkey'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
+
+#set host
+host = 'https://127.0.0.1:5000/'
+
+DATABASE = 'starstuck.db'
+#set up database
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
+#initiate the database with the schema
+def init_db():
+    with app.app_context():
+        db = get_db()
+        with app.open_resource('schema.sql', mode = 'r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
+
+@app.route('/success')
+def success():
+    return 'Registration successful!'
+
+@app.route('/logout')
+def logout():
+    session.pop('studio_name', None)  # Remove the studio name from the session
+    return redirect(url_for('login'))
 
 @app.route('/')
-def register_pieces():
-    return render_template('register_pieces.html')
+def home():
+    return render_template('home.html')
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
-# Route for the form
-@app.route('/submit_pieces', methods=['POST'])
-def submit_pieces():
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     if request.method == 'POST':
-        cursor = db_connection.cursor()
+        # Retrieve form data
+        studio_name = request.form['studio']
+        
+        # Check if studio exists in the database
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM studios WHERE studio_name = ?", (studio_name,))
+        studio = cursor.fetchone()
 
-        # Get form data
-        studio = request.form['studio']
-        song = request.form['song']
-        duration = request.form['duration']
-        style = request.form['style']
-        ageGroup = request.form['ageGroup']
-        sizeCategory = request.form['sizeCategory']
-        fname = request.form.getlist('fname')
-        lname = request.form.getlist('lname')
-        age = request.form.getlist('age')
-        gender = request.form.getlist('gender')
+        if studio:
+            # Studio exists, store its name in the session
+            session['studio_name'] = studio_name
+            # Redirect to another page or indicate login success
+            return redirect(url_for('/login_choices'))
+        else:
+            # Studio not found, handle the error (e.g., show an error message)
+            flash('Studio not found. Please try again.', 'error')
 
-        # Insert data into Set_List table
-        insert_set_list_query = "INSERT INTO Set_List (studio_name, song, song_duration, style, age_group, size_category) VALUES (%s, %s, %s, %s, %s, %s)"
-        cursor.execute(insert_set_list_query, (studio, song, duration, style, ageGroup, sizeCategory))
-        db_connection.commit()
+    # Render the login page template for GET request
+    return render_template('login.html')
 
-        # Insert data into Dancer table
-        insert_dancer_query = "INSERT INTO Dancer (studio_name, name, age, gender) VALUES (%s, %s, %s, %s)"
-        for i in range(len(fname)):
-            name = fname[i] + ' ' + lname[i]
-            cursor.execute(insert_dancer_query, (studio, name, age[i], gender[i]))
-            db_connection.commit()
+@app.route('/login_choices')
+def login_choices():
+    return render_template('loginChoices.html')
 
+@app.route('/payment')
+def payment():
+    return render_template('payment.html')
+
+@app.route('/register_studio', methods=['GET', 'POST'])
+def register_studio():
+    if request.method == 'POST':
+        # Process the form data
+        studio_name = request.form['studio_name']
+        state = request.form['state']
+        city = request.form['city']
+        # ... process other form fields ...
+
+        # Insert data into the database
+        db = get_db()
+        cursor = db.cursor()
+        # Make sure your SQL query matches the database schema
+        cursor.execute("INSERT INTO Studio (studio_name, state, city) VALUES (?, ?, ?)", (studio_name, state, city))
+        db.commit()
         cursor.close()
 
-        # Redirect to success page
-        return redirect('/success')  # Change this to the appropriate success page URL
+        # Redirect to the success page after successful form submission
+        return redirect(url_for('success'))
 
+    # Render the form page for GET request
+    return render_template('registerStudio.html')
 
+@app.route('/schedule')
+def schedule():
+    return render_template('schedule.html')
 
+@app.route('/register_pieces')
+def register_pieces():
+    return render_template('registerPieces.html')
 
-
-@app.route('/submit_piece', methods=['POST'])
-def submit_piece():
-    if request.method == 'POST':
-        piece_name = request.form['piece_name']
-        # Retrieve other form fields similarly
-
-        # Insert data into the database using the function from database.py
-        result = insert_piece(piece_name)
-
-        if result:
-            return "Piece registered successfully!"
-        else:
-            return "Error registering piece."
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    init_db() # initialize the database
+    app.run(debug=True, port=5001)  # Runs on http://127.0.0.1:5000 by default
 
+
+
+#REGISTER STUDIO-- studio table
+# @app.route('/register', methods=['POST'])
+# def register_studio():
+    # if request.method == 'POST':
+    #     # Get data from form
+    #     studio_name = request.form['studio_name']
+    #     state = request.form['state']
+    #     city = request.form['city']
+
+    #     # Insert data into database
+    #     db = get_db()
+    #     cursor = db.cursor()
+    #     query = ''' INSERT INTO studios (studio_name, state, city) VALUES (?, ?, ?) '''
+    #     cursor.execute(query, (studio_name, state, city))
+    #     db.commit()
+    #     return render_template('register.html')  # Redirect to a success page or back to form
+    # else:
+    # return render_template('register.html')  # Redirect to the registration form
+
+
+
+# #REGISTER PIECES-- pieces table
+# @app.route('/registerPieces', methods=['GET','POST'])
+# def register_pieces():
+#     if request.method == 'POST':
+#         db = get_db()
+#         cursor = db.cursor()
+
+#         # Retrieve form data
+#         studios = request.form.getlist('studio[]')
+#         songs = request.form.getlist('song[]')
+#         durations = request.form.getlist('duration[]')
+#         styles = request.form.getlist('style[]')
+#         ageGroups = request.form.getlist('ageGroup[]')
+#         sizeCategories = request.form.getlist('sizeCategory[]')
+#         fnames = request.form.getlist('fname[]')
+#         lnames = request.form.getlist('lname[]')
+#         ages = request.form.getlist('age[]')
+#         genders = request.form.getlist('gender[]')
+
+#         # Assuming each row in the form corresponds to one entry
+#         for i in range(len(studios)):
+#             # Insert data into Set_List table
+#             insert_set_list_query = '''INSERT INTO Set_List (studio_name, song, song_duration, style, age_group, size_category) VALUES (?, ?, ?, ?, ?, ?)'''
+#             cursor.execute(insert_set_list_query, (studios[i], songs[i], durations[i], styles[i], ageGroups[i], sizeCategories[i]))
+#             db.commit()
+
+#         # Insert data into Dancer table
+#         insert_dancer_query = '''INSERT INTO Dancer (studio_name, name, age, gender) VALUES (?, ?, ?, ?)'''
+#         for i in range(len(fnames)):
+#             name = fnames[i] + ' ' + lnames[i]
+#             cursor.execute(insert_dancer_query, (studios[0], name, ages[i], genders[i]))  # Assuming all dancers belong to the first studio
+#             db.commit()
+
+#         cursor.close()
+#         return redirect(url_for('success'))  # Redirect to a success page or back to form
+
+#     return render_template('registerPieces.html')  # If not POST request
 
 
 # -- Retrieve all payments for a specific studio

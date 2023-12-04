@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--CSS Styles -->
-    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
     <!-- Animate CSS CDN -->
     <link
@@ -29,17 +29,17 @@
     <nav>
       <body style="background-color:rgb(0, 0, 0);"></body>
       <h1>
-        <a href="file:///Users/kellychau/Desktop/stage3/home.html">Starstruck Dance Competition</a>
+        <a href="/">Starstruck Dance Competition</a>
       </h1>
 
       <ul class="navigation bar">
-        <a href="/Users/kellychau/Desktop/stage3/about.html" class="nav-link">About Us</a>
-        <a href="/Users/kellychau/Desktop/stage3/contact.html" class="nav-link">Contact</a>
-        <a href="/Users/kellychau/Desktop/stage3/register.html" class="nav-link">Register</a>
-        <a href="/Users/kellychau/Desktop/stage3/schedule.html" class="nav-link">Schedule</a>
-        <a href="/Users/kellychau/Desktop/stage3/login.html" class="nav-link">Login</a>
-    </ul>
-  </nav>
+        <a href="about" class="nav-link">About Us</a>
+        <a href="contact" class="nav-link">Contact</a>
+        <a href="register_studio" class="nav-link">Register</a>
+        <a href="schedule" class="nav-link">Schedule</a>
+        <a href="login" class="nav-link">Login</a>
+      </ul>
+    </nav>
 
   <section>
     <h1 style="text-align:center; color:rgb(255, 131, 208);"> We are starstruck</h1>
@@ -52,7 +52,7 @@
     <div class="row" style="display: flex; justify-content: center;">
       <div class="column" style="margin: 0 10px;">
         <div class="card" style="color:rgb(255, 255, 255);">
-          <img src="/Users/kellychau/Desktop/stage3/pics/ilysa.png" alt="ilysa" style="width:80%;">
+          <img src="pics/ilysa.png" alt="ilysa" style="width:80%;">
           <div class="container" >
             <h2>Ilysa Sanchez-Perez</h2>
             <p class="title">Founder</p>
@@ -64,7 +64,7 @@
     
       <div class="column" style="margin: 0 10px;">
         <div class="card" style="color:rgb(255, 255, 255);">
-          <img src="/Users/kellychau/Desktop/stage3/pics/kelly.png" alt="kelly" style="width:80%;">
+          <img src="pics/kelly.png" alt="kelly" style="width:80%;">
           <div class="container">
             <h2>Kelly Chau</h2>
             <p class="title">Founder</p>
