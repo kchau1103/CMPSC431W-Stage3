@@ -46,93 +46,98 @@
       <p><a href="/login_choices">Back to My Information </a>.</p>
     </div>
   </section>
+
+  <section>
+    <form action="{{ url_for('register_pieces') }}" method="post">
+      <table id="piecesTable" style="color:rgb(255, 255, 255); margin-bottom: 20px;">
+      <h1 style="color:rgb(255, 131, 208);">Piece:</h1>
+        <tr>
+          <td><label for="song" style="font-size: 18px;"><b>Song:</b></label></td>
+          <td><input type="text" name="song" style="font-size: 16px; width: 100%;" required></td>
   
-    <section>
+          <td><label for="duration" style="font-size: 18px;"><b>Song Duration:</b></label></td>
+          <td><input type="text" name="duration" style="font-size: 16px; width: 100%;" required></td>
 
-      <form action="{{ url_for('register_pieces') }}" method="post">
-        
-        <table id="piecesTable" style="color:rgb(255, 255, 255); margin-bottom: 20px;">
-        <h1 style="color:rgb(255, 131, 208);">Piece:</h1>
-          <tr>
-            <td><label for="studio" style="font-size: 18px;"><b>Studio Name:</b></label></td>
-            <td><input type="text" name="studio[]" style="font-size: 16px; width: 100%;" required></td>
-          </tr>
-          <tr>
-            <td><label for="song" style="font-size: 18px;"><b>Song:</b></label></td>
-            <td><input type="text" name="song[]" style="font-size: 16px; width: 100%;" required></td>
-    
-            <td><label for="duration" style="font-size: 18px;"><b>Song Duration:</b></label></td>
-            <td><input type="text" name="duration[]" style="font-size: 16px; width: 100%;" required></td>
-          </tr>
-          </tr>
-            <td><label for="style" style="font-size: 18px;"><b>Style:</b></label></td>
-            <td><input type="text" name="style[]" style="font-size: 16px; width: 100%;" required></td>
+          <td><label for="style" style="font-size: 18px;"><b>Style:</b></label></td>
+          <td><input type="text" name="style" style="font-size: 16px; width: 100%;" required></td>
+        </tr>
+        <tr>
+          <td>
+              <label for="ageGroup" style="font-size: 18px;"><b>Age Group:</b></label>
+          </td>
+          <td>
+              <input type="radio" id="age8-10" name="ageGroup" value="8-10">
+              <label for="age8-10">8 AND 10</label>
+              <input type="radio" id="age11-12" name="ageGroup" value="11-12">
+              <label for="age11-12">11 AND 12</label>
+              <input type="radio" id="age13-15" name="ageGroup" value="13-15">
+              <label for="age13-15">13 AND 15</label>
+              <input type="radio" id="age16-19" name="ageGroup" value="16-19">
+              <label for="age16-19">16 AND 19</label>
+          </td>
+      </tr>
+    </table>
 
-            <td><label for="ageGroup" style="font-size: 18px;"><b>Age Group:</b></label></td>
-            <td><input type="text" name="ageGroup[]" style="font-size: 16px; width: 100%;" required></td>
-    
-            <td><label for="sizeCategory" style="font-size: 18px;"><b>Size Category:</b></label></td>
-            <td><input type="text" name="sizeCategory[]" style="font-size: 16px; width: 100%;" required></td>
-          </tr>
-        </table>
+    <h1 style="color:rgb(255, 131, 208);">Dancers:</h1>
+    <table id="peopleTable" style="color:rgb(255, 255, 255); margin-bottom: 20px;">
+      <tr>
+        <td><label for="numDancers" style="font-size: 18px;"><b>Number of Dancers:</b></label></td>
+        <td><input type="text" name="numDancers" style="font-size: 16px; width: 100%;" required></td>
+      </tr>
+      <tr>
+        <td><label for="fname" style="font-size: 18px;"><b>First Name:</b></label></td>
+        <td><input type="text" name="fname[]" style="font-size: 16px; width: 100%;" required></td>
 
+        <td><label for="lname" style="font-size: 18px;"><b>Last Name:</b></label></td>
+        <td><input type="text" name="lname[]" style="font-size: 16px; width: 100%;" required></td>
 
-        <h1 style="color:rgb(255, 131, 208);">Dancers:</h1>
-        <table id="peopleTable" style="color:rgb(255, 255, 255); margin-bottom: 20px;">
-          <tr>
-            <td><label for="fname" style="font-size: 18px;"><b>First Name:</b></label></td>
-            <td><input type="text" name="fname[]" style="font-size: 16px; width: 100%;" required></td>
+        <td><label for="age" style="font-size: 18px;"><b>Age:</b></label></td>
+        <td><input type="number" name="age[]" style="font-size: 16px; width: 100%;" required></td>
+
+        <td><label for="gender" style="font-size: 18px;"><b>Gender:</b></label></td>
+        <td>
+          <select name="gender[]" style="font-size: 16px; width: 100%;">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+
+    <button type="button" onclick="addPerson()" style="font-size: 18px;">Add Person</button>
+    <br><br>
+    <button type="submit" style="font-size: 18px;">Submit</button>
+
+  </form>
     
-            <td><label for="lname" style="font-size: 18px;"><b>Last Name:</b></label></td>
-            <td><input type="text" name="lname[]" style="font-size: 16px; width: 100%;" required></td>
-    
-            <td><label for="age" style="font-size: 18px;"><b>Age:</b></label></td>
-            <td><input type="number" name="age[]" style="font-size: 16px; width: 100%;" required></td>
-    
-            <td><label for="gender" style="font-size: 18px;"><b>Gender:</b></label></td>
-            <td>
-              <select name="gender[]" style="font-size: 16px; width: 100%;">
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-            </td>
-          </tr>
-        </table>
-    
-        <button type="button" onclick="addPerson()" style="font-size: 18px;">Add Person</button>
-        <br><br>
-        <button type="submit" style="font-size: 18px;">Submit</button>
-    
-      </form>
-    
-      <script>
-        function addPerson() {
-          const table = document.getElementById("peopleTable");
-          const newRow = table.insertRow(-1);
-          
-          const cell1 = newRow.insertCell(0);
-          const cell2 = newRow.insertCell(1);
-          const cell3 = newRow.insertCell(2);
-          const cell4 = newRow.insertCell(3);
-          const cell5 = newRow.insertCell(4);
-          const cell6 = newRow.insertCell(5);
-          const cell7 = newRow.insertCell(6);
-          const cell8 = newRow.insertCell(7);
-          
-          cell1.innerHTML = '<label for="fname" style="font-size: 18px;"><b>First Name:</b></label>';
-          cell2.innerHTML = '<input type="text" name="fname[]" style="font-size: 16px; width: 100%;" required>';
-          cell3.innerHTML = '<label for="lname" style="font-size: 18px;"><b>Last Name:</b></label>';
-          cell4.innerHTML = '<input type="text" name="lname[]" style="font-size: 16px; width: 100%;" required>';
-          cell5.innerHTML = '<label for="age" style="font-size: 18px;"><b>Age:</b></label>';
-          cell6.innerHTML = '<input type="number" name="age[]" style="font-size: 16px; width: 100%;" required>';
-          cell7.innerHTML = '<label for="gender" style="font-size: 18px;"><b>Gender:</b></label>';
-          cell8.innerHTML = `
-            <select name="gender[]" style="font-size: 16px; width: 100%;">
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>`;
-        }
-      </script>
-    </section>
+  <script>
+    function addPerson() {
+      const table = document.getElementById("peopleTable");
+      const newRow = table.insertRow(-1);
+      
+      const cell1 = newRow.insertCell(0);
+      const cell2 = newRow.insertCell(1);
+      const cell3 = newRow.insertCell(2);
+      const cell4 = newRow.insertCell(3);
+      const cell5 = newRow.insertCell(4);
+      const cell6 = newRow.insertCell(5);
+      const cell7 = newRow.insertCell(6);
+      const cell8 = newRow.insertCell(7);
+      
+      cell1.innerHTML = '<label for="fname" style="font-size: 18px;"><b>First Name:</b></label>';
+      cell2.innerHTML = '<input type="text" name="fname[]" style="font-size: 16px; width: 100%;" required>';
+      cell3.innerHTML = '<label for="lname" style="font-size: 18px;"><b>Last Name:</b></label>';
+      cell4.innerHTML = '<input type="text" name="lname[]" style="font-size: 16px; width: 100%;" required>';
+      cell5.innerHTML = '<label for="age" style="font-size: 18px;"><b>Age:</b></label>';
+      cell6.innerHTML = '<input type="number" name="age[]" style="font-size: 16px; width: 100%;" required>';
+      cell7.innerHTML = '<label for="gender" style="font-size: 18px;"><b>Gender:</b></label>';
+      cell8.innerHTML = `
+        <select name="gender[]" style="font-size: 16px; width: 100%;">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>`;
+    }
+  </script>
+</section>

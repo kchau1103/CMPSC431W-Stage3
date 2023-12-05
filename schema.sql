@@ -1,84 +1,91 @@
-DROP TABLE IF EXISTS Payment;
-CREATE TABLE Payment (
-    payment_id INT AUTO_INCREMENT PRIMARY KEY,
-    registration_status VARCHAR(50),
-    studio_name VARCHAR(100),
-    amount_due DECIMAL(10, 2),
-    paid BOOLEAN,
-    payment_status VARCHAR(50),
-    FOREIGN KEY (studio_name) REFERENCES Studio(studio_name)
-);
+-- -- Studio Table
+-- CREATE TABLE Studio (
+--     studio_name TEXT PRIMARY KEY,
+--     city TEXT,
+--     state TEXT
+-- );
 
-DROP TABLE IF EXISTS Set_List;
-CREATE TABLE Set_List (
-    entry_num INT AUTO_INCREMENT PRIMARY KEY,
-    studio_name VARCHAR(100),
-    num_dancers INT,
-    style VARCHAR(50),
-    registration_status VARCHAR(50),
-    song_duration TIME,
-    avg_age INT,
-    song VARCHAR(100),
-    FOREIGN KEY (studio_name) REFERENCES Studio(studio_name)
-);
+-- -- Set_List Table
+-- CREATE TABLE Set_List (
+--     entry_num INTEGER PRIMARY KEY,
+--     studio_name TEXT,
+--     num_dancers INT,
+--     style TEXT,
+--     registration_status TEXT,
+--     song_duration TIME,
+--     avg_age INT,
+--     song TEXT,
+--     FOREIGN KEY (studio_name) REFERENCES Studio(studio_name)
+-- );
 
-DROP TABLE IF EXISTS Studio;
-CREATE TABLE Studio (
-    studio_name VARCHAR(100) PRIMARY KEY,
-    city VARCHAR(100),
-    state VARCHAR(100)
-);
+-- -- Schedule Table
+-- CREATE TABLE Schedule (
+--     order_num INTEGER PRIMARY KEY,
+--     date DATE,
+--     call_time TIME,
+--     song TEXT,
+--     FOREIGN KEY (song) REFERENCES Set_List(entry_num)
+-- );
 
-DROP TABLE IF EXISTS Schedule;
-CREATE TABLE Schedule (
-    order_num INT AUTO_INCREMENT PRIMARY KEY,
-    date DATE,
-    call_time TIME,
-    song VARCHAR(100),
-    FOREIGN KEY (song) REFERENCES Set_List(entry_num)
-);
+-- -- Dancer Table
+-- CREATE TABLE Dancer (
+--     studio_name TEXT,
+--     name TEXT,
+--     age INT,
+--     gender TEXT,
+--     order_num INTEGER,
+--     PRIMARY KEY (studio_name, name),
+--     FOREIGN KEY (studio_name) REFERENCES Studio(studio_name),
+--     FOREIGN KEY (order_num) REFERENCES Schedule(order_num)
+-- );
 
-DROP TABLE IF EXISTS Dancer;
-CREATE TABLE Dancer (
-    studio_name VARCHAR(100),
-    name VARCHAR(100),
-    age INT,
-    gender VARCHAR(10),
-    order_num INT,
-    PRIMARY KEY (studio_name, name), -- Assuming a dancer's name is unique within a studio
-    FOREIGN KEY (studio_name) REFERENCES Studio(studio_name),
-    FOREIGN KEY (order_num) REFERENCES Schedule(order_num)
-);
+-- -- Piece Table
+-- CREATE TABLE Piece (
+--     order_num INTEGER PRIMARY KEY,
+--     studio_name TEXT,
+--     size_category TEXT,
+--     age_group TEXT,
+--     style TEXT,
+--     song TEXT,
+--     award_name INTEGER,
+--     FOREIGN KEY (studio_name) REFERENCES Studio(studio_name),
+--     FOREIGN KEY (song) REFERENCES Set_List(entry_num),
+--     FOREIGN KEY (award_name) REFERENCES Adjudication(award_name)
+-- );
 
-DROP TABLE IF EXISTS Piece;
-CREATE TABLE Piece (
-    order_num INT,
-    studio_name VARCHAR(100),
-    size_category VARCHAR(50),
-    age_group VARCHAR(50),
-    style VARCHAR(50),
-    song VARCHAR(100),
-    award_name INT,
-    PRIMARY KEY (order_num, studio_name), -- Composite primary key
-    FOREIGN KEY (order_num) REFERENCES Schedule(order_num),
-    FOREIGN KEY (studio_name) REFERENCES Studio(studio_name),
-    FOREIGN KEY (song) REFERENCES Set_List(entry_num),
-    FOREIGN KEY (award_name) REFERENCES Adjudication(award_name)
-);
+-- -- Judges_Score Table
+-- CREATE TABLE Judges_Score (
+--     order_num INTEGER,
+--     judge_id INTEGER,
+--     score DECIMAL(5, 2),
+--     PRIMARY KEY (order_num, judge_id),
+--     FOREIGN KEY (order_num) REFERENCES Piece(order_num)
+-- );
 
-DROP TABLE IF EXISTS Judges_Score;
-CREATE TABLE Judges_Score (
-    order_num INT,
-    judge_id INT,
-    score DECIMAL(5, 2),
-    PRIMARY KEY (order_num, judge_id), -- Composite primary key
-    FOREIGN KEY (order_num) REFERENCES Piece(order_num)
-);
+-- -- Adjudication Table
+-- CREATE TABLE Adjudication (
+--     award_name INTEGER PRIMARY KEY,
+--     order_num INTEGER,
+--     total_score DECIMAL(5, 2),
+--     FOREIGN KEY (order_num) REFERENCES Piece(order_num)
+-- );
 
-DROP TABLE IF EXISTS Adjudication;
-CREATE TABLE Adjudication (
-    award_name INT AUTO_INCREMENT PRIMARY KEY,
-    order_num INT,
-    total_score DECIMAL(5, 2),
-    FOREIGN KEY (order_num) REFERENCES Piece(order_num)
-);
+-- -- Payment Table
+-- CREATE TABLE Payment (
+--     payment_id INTEGER PRIMARY KEY,
+--     registration_status TEXT,
+--     studio_name TEXT,
+--     amount_due DECIMAL(10, 2),
+--     paid BOOLEAN,
+--     payment_status TEXT,
+--     FOREIGN KEY (studio_name) REFERENCES Studio(studio_name)
+-- );
+
+-- -- DROP TABLE Payment;
+-- -- DROP TABLE Set_List;
+-- -- DROP TABLE Studio;
+-- -- DROP TABLE Schedule;
+-- -- DROP TABLE Dancer;
+-- -- DROP TABLE Piece;
+-- -- DROP TABLE Judges_Score;
+-- -- DROP TABLE Adjudication;

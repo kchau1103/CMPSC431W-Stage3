@@ -1,7 +1,7 @@
 #import modules
 from flask import Flask, render_template, request, redirect, url_for, g, session, jsonify, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import timedelta
+from datetime import datetime, timedelta
 import pandas as pd
 import sqlite3
 import hashlib
@@ -112,62 +112,157 @@ def register_studio():
 def schedule():
     return render_template('schedule.html')
 
+
+# def generate_schedule_entry(song):
+#     db = get_db()
+#     cursor = db.cursor()
+
+#     # Fetch the latest date and call time from the Schedule table
+#     cursor.execute("SELECT MAX(date), MAX(call_time) FROM Schedule")
+#     latest_schedule = cursor.fetchone()
+#     latest_date, latest_call_time = latest_schedule if latest_schedule else (None, None)
+
+#     # Define logic for date and call time
+#     if not latest_date:
+#         # If no schedule exists yet, start from a predefined date and time
+#         new_date = datetime(2023, 1, 1)  # Example start date
+#         new_call_time = datetime.strptime("08:00:00", "%H:%M:%S").time()  # Example start time
+#     else:
+#         # Increment the call time, and if it's the end of the day, increment the date
+#         new_call_time = (datetime.combine(datetime.today(), latest_call_time) + timedelta(minutes=30)).time()  # Example increment
+#         new_date = latest_date
+#         if new_call_time.hour >= 20:  # Assuming end of day is 8 PM
+#             new_date += timedelta(days=1)
+#             new_call_time = datetime.strptime("08:00:00", "%H:%M:%S").time()  # Reset to start time
+
+#     # Insert new schedule entry
+#     cursor.execute("INSERT INTO Schedule (date, call_time, song) VALUES (?, ?, ?)", 
+#                    (new_date, new_call_time, song))
+#     db.commit()
+
+def get_size_category(age_group):
+    age_category_map = {
+        "8-10": "Mini",
+        "11-12": "Junior",
+        "13-15": "Teen",
+        "16-19": "Senior"
+    }
+    return age_category_map.get(age_group, "Age Group Error")
+
 @app.route('/register_pieces', methods=['GET', 'POST'])
 def register_pieces():
     if request.method == 'POST':
-        studio_name = request.form.get('studio[]')
-        songs = request.form.getlist('song[]')
-        durations = request.form.getlist('duration[]')
-        styles = request.form.getlist('style[]')
-        age_groups = request.form.getlist('ageGroup[]')
-        size_categories = request.form.getlist('sizeCategory[]')
-        first_names = request.form.getlist('fname[]')
-        last_names = request.form.getlist('lname[]')
-        ages = request.form.getlist('age[]')
-        genders = request.form.getlist('gender[]')
-        
+        song = request.form.get('song')
+        duration = request.form.get('duration')
+        style = request.form.get('style')
+        age_group = request.form.get('ageGroup')
+        size_category = get_size_category(age_group)
+        first_name = request.form.getlist('fname[]')
+        last_name = request.form.getlist('lname[]')
+        age = request.form.getlist('age[]')
+        gender = request.form.getlist('gender[]')
+        num_dancers = request.form.get('numDancers')
+        registration_status = "Registered"
+
+        studio_name = session.get('studio_name')
+        if studio_name is None:
+            return redirect(url_for('login'))
+
+        if age:
+            int_ages = [int(a) for a in age if a.isdigit()]
+            avg_age = sum(int_ages) / len(int_ages) if int_ages else 0
+        else:
+            avg_age = 0
+
         db = get_db()
         cursor = db.cursor()
-        # Assuming each list has the same length
-        for i in range(len(songs)):
-            # Insert each song into the Piece table
-            cursor.execute("INSERT INTO Piece (studio_name, size_category, age_group, style, song) VALUES (?, ?, ?, ?, ?)", 
-                           (studio_name, size_categories[i], age_groups[i], styles[i], songs[i]))
         
-        for i in range(len(first_names)):
-            # Combine first and last names to create full name
-            full_name = first_names[i] + " " + last_names[i]
-            # Insert each dancer into the Dancer table
-            cursor.execute("INSERT INTO Dancer (studio_name, name, age, gender) VALUES (?, ?, ?, ?)", 
-                           (studio_name, full_name, ages[i], genders[i]))
+        cursor.execute("""
+            INSERT INTO Piece (studio_name, size_category, age_group, style, song) 
+            VALUES (?, ?, ?, ?, ?)
+            """, (studio_name, size_category, age_group, style, song))
+
+        for i in range(len(first_name)):
+            full_name = first_name[i] + " " + last_name[i]
+            cursor.execute("""
+                INSERT INTO Dancer (studio_name, name, age, gender) 
+                VALUES (?, ?, ?, ?)
+                """, (studio_name, full_name, age[i], gender[i]))
+
+        cursor.execute("""
+            INSERT INTO Set_List (studio_name, num_dancers, style, registration_status, song_duration, avg_age, song)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (studio_name, num_dancers, style, registration_status, duration, avg_age, song))
+
         db.commit()
         cursor.close()
         return redirect(url_for('success'))
+
     return render_template('registerPieces.html')
 
 @app.route('/my_payments')
 def my_payments():
     return render_template('myPayments.html')
 
-@app.route('/my_pieces')
-def my_pieces():
+@app.route('/my_setlist')
+def my_setlist():
+    studio_name = session.get('studio_name')
+    if studio_name is None:
+        return redirect(url_for('login'))  # Redirect to login if studio name is not in session
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM Piece")
-    pieces = cursor.fetchall()  # Fetches all rows from the Piece table
+    cursor.execute("SELECT * FROM Set_List WHERE studio_name = ?", (studio_name,))
+    setlists = cursor.fetchall()  # Fetches all rows from the Dancer table
+    return render_template('mySetlist.html', setlists=setlists)
+
+@app.route('/my_pieces')
+def my_pieces():
+    studio_name = session.get('studio_name')
+    if studio_name is None:
+        return redirect(url_for('login'))  # Redirect to login if studio name is not in session
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM Piece WHERE studio_name = ?", (studio_name,))
+    pieces = cursor.fetchall()
     return render_template('myPieces.html', pieces=pieces)
 
 @app.route('/my_dancers')
 def my_dancers():
+    studio_name = session.get('studio_name')
+    if studio_name is None:
+        return redirect(url_for('login'))  # Redirect to login if studio name is not in session
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM Dancer")
+    cursor.execute("SELECT * FROM Dancer WHERE studio_name = ?", (studio_name,))
     dancers = cursor.fetchall()  # Fetches all rows from the Dancer table
-    
     return render_template('myDancers.html', dancers=dancers)
+
+@app.route('/edit_dancers')
+def edit_dancers():
+
+    return render_template('editDancers.html')
+
+@app.route('/select_dancer_edit', methods=['GET', 'POST'])
+def select_dancer_edit():
+    studio_name = session.get('studio_name')
+    if studio_name is None:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        selected_dancer_id = request.form.get('dancer')
+        return redirect(url_for('edit_dancers', id=selected_dancer_id))
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT name FROM Dancer WHERE studio_name = ?", (studio_name,))
+    dancers = cursor.fetchall()
+    return render_template('selectEditDancer.html', dancers=dancers)
 
 @app.route('/my_adjudications')
 def my_adjudications():
+    # studio_name = session.get('studio_name')
+    # if studio_name is None:
+    #     return redirect(url_for('login'))  # Redirect to login if studio name is not in session
     db = get_db()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM Adjudication")
@@ -179,12 +274,6 @@ if __name__ == '__main__':
     app.run(debug=True, port=5001)  # Runs on http://127.0.0.1:5000 by default
 
 
-
-# -- Retrieve all payments for a specific studio
-# SELECT * FROM Payment WHERE studio_nameFK = 'specific_studio';
-
-# -- Retrieve all dancers from a specific studio
-# SELECT * FROM Dancer WHERE studio_nameFK = 'specific_studio';
 
 # -- Retrieve all pieces in a specific age group
 # SELECT * FROM Piece WHERE age_group = 'specific_age_group';

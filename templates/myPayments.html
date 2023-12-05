@@ -46,7 +46,7 @@
       <p><a href="/login_choices">Back to My Information </a>.</p>
     </div>
   </section>
-  
+
     <body>
       <h1 style="color:rgb(255, 131, 208);">My Payments</h1>
       <table>
@@ -56,17 +56,19 @@
                   <th>Registration Status</th>
                   <th>Studio Name</th>
                   <th>Amount Due</th>
+                  <th>Paid</th>
                   <th>Payment Status</th>
               </tr>
           </thead>
           <tbody>
               {% for payment in payments %}
               <tr>
-                  <td>{{ payment.payment_id }}</td>
-                  <td>{{ payment.registration_status }}</td>
-                  <td>{{ payment.studio_name }}</td>
-                  <td>{{ payment.amont_due }}</td>
-                  <td>{{ payment.payment_status }}</td>
+                  <td>{{ payment[0] }}</td>
+                  <td>{{ payment[1] }}</td>
+                  <td>{{ payment[2] }}</td>
+                  <td>{{ payment[3] }}</td>
+                  <td>{{ payment[4] }}</td>
+                  <td>{{ payment[5] }}</td>
               </tr>
               {% endfor %}
           </tbody>
@@ -169,10 +171,7 @@
 th, td {
     border: 1px solid #ddd;
     padding: 8px;
-}
-
-tr:nth-child(even) {
-    background-color: #f2f2f2;
+    color: #ffffff;
 }
 
 th {

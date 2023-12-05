@@ -41,30 +41,45 @@
       </ul>
     </nav>
 
+  </section>
+    <div class="container signin" style="color:rgb(255, 131, 208);">
+      <p><a href="/login_choices">Back to My Information </a>.</p>
+    </div>
+  </section>
+
     <body>
-      <h1 style="color:rgb(255, 131, 208);">Full Schedule</h1>
+      <h1 style="color:rgb(255, 131, 208);">My Setlist</h1>
       <table>
           <thead>
               <tr>
-                  <th>Order Num</th>
-                  <th>Date</th>
-                  <th>Call Time</th>
+                  <th>Entry Number</th>
+                  <th>Studio Name</th>
+                  <th>Number of Dancers</th>
+                  <th>Style</th>
+                  <th>Registration Status</th>
+                  <th>Song Duration</th>
+                  <th>Average Age</th>
                   <th>Song</th>
               </tr>
           </thead>
           <tbody>
-              {% for schedule in schedules %}
+              {% for setlist in setlists %}
               <tr>
-                  <td>{{ schedule[0] }}</td>
-                  <td>{{ schedule[1] }}</td>
-                  <td>{{ schedule[2] }}</td>
-                  <td>{{ schedule[3] }}</td>
+                  <td>{{ setlist[0] }}</td>
+                  <td>{{ setlist[1] }}</td>
+                  <td>{{ setlist[2] }}</td>
+                  <td>{{ setlist[3] }}</td>
+                  <td>{{ setlist[4] }}</td>
+                  <td>{{ setlist[5] }}</td>
+                  <td>{{ setlist[6] }}</td>
+                  <td>{{ setlist[7] }}</td>
               </tr>
               {% endfor %}
           </tbody>
       </table>
-  </body>
+
   </html>
+
   <style>
     table {
     width: 100%;
@@ -74,7 +89,7 @@
 th, td {
     border: 1px solid #ddd;
     padding: 8px;
-    color: #ffffff
+    color: #ffffff;
 }
 
 th {

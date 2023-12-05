@@ -50,62 +50,16 @@
     </ul>
   </nav>
 
-  </section>
-    <div class="container signin" style="color:rgb(255, 131, 208);">
-      <p><a href="/login_choices">Back to My Information </a>.</p>
-    </div>
-  </section>
+  <h1>Select Dancer to Edit</h1>
+    <form action="{{ url_for('edit_dancers') }}" method="post">
+        <label for="dancer">Choose a Dancer:</label>
+        <select id="dancer" name="dancer">
+            {% for name in dancers %}
+                <option value="{{ id }}">{{ name }}</option>
+            {% endfor %}
+        </select>
 
-  <h1 style="color:rgb(255, 131, 208);">My Dancers</h1>
-  <table>
-      <thead>
-          <tr>
-              <th>Studio Name</th>
-              <th>Name</th>
-              <th>Age</th>
-              <th>Gender</th>
-              <th>Order Num</th>
-          </tr>
-      </thead>
-      <tbody>
-          {% for dancer in dancers %}
-              <td>{{ dancer[0] }}</td>
-              <td>{{ dancer[1] }}</td>
-              <td>{{ dancer[2] }}</td>
-              <td>{{ dancer[3] }}</td>
-          </tr>
-          {% endfor %}
-      </tbody>
-  </table>
-  <br><br><br>
-  <section>
-    <div class="button-container">
-      <a href="select_dancer_edit" class="large-button" height: auto>Edit Dancers </a> 
-    </div>
-  </section>
-</html>
-
-
-
-<style>
-  table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  border: 1px solid #ffffff;
-  padding: 8px;
-  color: #ffffff;
-}
-
-th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: rgb(255, 128, 234);
-  color: white; /* Change header font color here if needed */
-}
-  </style>
+        <input type="submit" value="Edit Dancer">
+    </form>
 </body>
 </html>

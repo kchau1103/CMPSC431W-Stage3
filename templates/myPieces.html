@@ -46,7 +46,7 @@
       <p><a href="/login_choices">Back to My Information </a>.</p>
     </div>
   </section>
-  
+
     <body>
       <h1 style="color:rgb(255, 131, 208);">My Pieces</h1>
       <table>
@@ -64,13 +64,13 @@
           <tbody>
               {% for piece in pieces %}
               <tr>
-                  <td>{{ piece.order_num }}</td>
-                  <td>{{ piece.studio_name }}</td>
-                  <td>{{ piece.size_category }}</td>
-                  <td>{{ piece.age_group }}</td>
-                  <td>{{ piece.style }}</td>
-                  <td>{{ piece.song }}</td>
-                  <td>{{ piece.award_name }}</td>
+                  <td>{{ piece[0] }}</td>
+                  <td>{{ piece[1] }}</td>
+                  <td>{{ piece[2] }}</td>
+                  <td>{{ piece[3] }}</td>
+                  <td>{{ piece[4] }}</td>
+                  <td>{{ piece[5] }}</td>
+                  <td>{{ piece[6] }}</td>
               </tr>
               {% endfor %}
           </tbody>
@@ -79,25 +79,22 @@
   </html>
 
   <style>
-    table {
-    width: 100%;
-    border-collapse: collapse;
+  table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
 th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-}
-
-tr:nth-child(even) {
-    background-color: #f2f2f2;
+  border: 1px solid #ffffff;
+  padding: 8px;
+  color: #ffffff;
 }
 
 th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: rgb(255, 128, 234);
-    color: white;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: rgb(255, 128, 234);
+  color: white; /* Change header font color here if needed */
 }
   </style>
