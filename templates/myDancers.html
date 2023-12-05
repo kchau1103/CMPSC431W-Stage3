@@ -40,8 +40,59 @@
         <a href="login" class="nav-link">Login</a>
       </ul>
     </nav>
-  <div style="position: relative;">
-    <img src="{{ url_for('static', filename='pics/logo.png') }}" alt="logo" width="auto">
-  </div>
-  </body>
+
+  </section>
+    <div class="container signin" style="color:rgb(255, 131, 208);">
+      <p><a href="/login_choices">Back to My Information </a>.</p>
+    </div>
+  </section>
+
+  <h1 style="color:rgb(255, 131, 208);">My Dancers</h1>
+  <table>
+      <thead>
+          <tr>
+              <th>Studio Name</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>Order Num</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for dancer in dancers %}
+          <tr>
+              <td>{{ dancer.studio_name }}</td>
+              <td>{{ dancer.name }}</td>
+              <td>{{ dancer.age }}</td>
+              <td>{{ dancer.gender }}</td>
+              <td>{{ dancer.order_num }}</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</html>
+<style>
+  table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ffffff;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: rgb(255, 128, 234);
+  color: white;
+}
+  </style>
+</body>
 </html>

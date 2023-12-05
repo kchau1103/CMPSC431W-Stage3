@@ -21,7 +21,11 @@
       h1 {
         font-size: 48px; /* Adjust the font size to your preference */
       }
+      .flash.error {
+        color: rgb(255, 131, 208); /* Or any style you prefer for error messages */
+      }
     </style>
+
   </head>
 
   <body>
@@ -42,7 +46,16 @@
     </nav>
 
     <section>
-      <form action="/login_choices" method="post">
+      <!-- Add this block to display flashed messages -->
+      {% with messages = get_flashed_messages(category_filter=["error"]) %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash error">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      {% endwith %}
+      
+      <form action="{{url_for('login')}}"  method="post">
       
         <div class="container" style="color:rgb(255, 255, 255);">
           <label for="studio_name" style="font-size: 18px; display: block;"><b>Studio Name</b></label>

@@ -41,30 +41,43 @@
       </ul>
     </nav>
 
+  </section>
+    <div class="container signin" style="color:rgb(255, 131, 208);">
+      <p><a href="/login_choices">Back to My Information </a>.</p>
+    </div>
+  </section>
+  
     <body>
-      <h1 style="color:rgb(255, 131, 208);">Full Schedule</h1>
+      <h1 style="color:rgb(255, 131, 208);">My Pieces</h1>
       <table>
           <thead>
               <tr>
-                  <th>Order Num</th>
-                  <th>Date</th>
-                  <th>Call Time</th>
+                  <th>Order Number</th>
+                  <th>Studio Name</th>
+                  <th>Size Category</th>
+                  <th>Age Group</th>
+                  <th>Style</th>
                   <th>Song</th>
+                  <th>Award Name</th>
               </tr>
           </thead>
           <tbody>
-              {% for schedule in schedules %}
+              {% for piece in pieces %}
               <tr>
-                  <td>{{ schedule.order_num }}</td>
-                  <td>{{ schedule.date }}</td>
-                  <td>{{ schedule.call_time }}</td>
-                  <td>{{ schedule.song }}</td>
+                  <td>{{ piece.order_num }}</td>
+                  <td>{{ piece.studio_name }}</td>
+                  <td>{{ piece.size_category }}</td>
+                  <td>{{ piece.age_group }}</td>
+                  <td>{{ piece.style }}</td>
+                  <td>{{ piece.song }}</td>
+                  <td>{{ piece.award_name }}</td>
               </tr>
               {% endfor %}
           </tbody>
       </table>
   </body>
   </html>
+
   <style>
     table {
     width: 100%;

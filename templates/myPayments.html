@@ -1,4 +1,4 @@
-<!-- payment.html-->
+<!-- home.html-->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--CSS Styles -->
-    templates/about.html
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
     <!-- Animate CSS CDN -->
     <link
       rel="stylesheet"
@@ -40,6 +41,41 @@
       </ul>
     </nav>
 
+  </section>
+    <div class="container signin" style="color:rgb(255, 131, 208);">
+      <p><a href="/login_choices">Back to My Information </a>.</p>
+    </div>
+  </section>
+  
+    <body>
+      <h1 style="color:rgb(255, 131, 208);">My Payments</h1>
+      <table>
+          <thead>
+              <tr>
+                  <th>Payment ID</th>
+                  <th>Registration Status</th>
+                  <th>Studio Name</th>
+                  <th>Amount Due</th>
+                  <th>Payment Status</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for payment in payments %}
+              <tr>
+                  <td>{{ payment.payment_id }}</td>
+                  <td>{{ payment.registration_status }}</td>
+                  <td>{{ payment.studio_name }}</td>
+                  <td>{{ payment.amont_due }}</td>
+                  <td>{{ payment.payment_status }}</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+      <section>
+        <form action="/my_payments" method="post">
+          <div class="container" style="color:rgb(255, 255, 255);">
+            <h1 style="color:rgb(255, 131, 208);">Make a Payment?</h1>
+    </body>
     <section>
       <div class="row">
         <div class="col-75">
@@ -120,3 +156,30 @@
         </div>
       </div>
     </section>
+  </html>
+
+
+
+  <style>
+    table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: rgb(255, 128, 234);
+    color: white;
+}
+  </style>

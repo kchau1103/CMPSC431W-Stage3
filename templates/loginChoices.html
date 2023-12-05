@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--CSS Styles -->
-    <link rel="stylesheet" href="/Users/kellychau/Desktop/stage3/assets/css/styles.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
     <!-- Animate CSS CDN -->
     <link
@@ -43,11 +43,11 @@
     
     <section>
       <div class="button-container">
-        <a href="registerPieces" class="large-button" height: auto>Register Pieces & Dancers </a> 
-        <a href="payment" class="large-button">My Payments</a>
-        <a href="myPieces" class="large-button">My Pieces</a>
-        <a href="myDancers" class="large-button">My Dancers</a>
-        <a href="myAdjudication" class="large-button">My Adjudications</a>
+        <a href="register_pieces" class="large-button" height: auto>Register Pieces & Dancers </a> 
+        <a href="my_payments" class="large-button">My Payments</a>
+        <a href="my_pieces" class="large-button">My Pieces</a>
+        <a href="my_dancers" class="large-button">My Dancers</a>
+        <a href="my_adjudications" class="large-button">My Adjudications</a>
       </div>
     </section>
 

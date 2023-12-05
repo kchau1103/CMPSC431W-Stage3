@@ -40,8 +40,55 @@
         <a href="login" class="nav-link">Login</a>
       </ul>
     </nav>
-  <div style="position: relative;">
-    <img src="{{ url_for('static', filename='pics/logo.png') }}" alt="logo" width="auto">
-  </div>
+
+    </section>
+      <div class="container signin" style="color:rgb(255, 131, 208);">
+        <p><a href="/login_choices">Back to My Information </a>.</p>
+      </div>
+    </section>
+
+    <body>
+      <h1 style="color:rgb(255, 131, 208);">My Adjudications</h1>
+      <table>
+          <thead>
+              <tr>
+                  <th>Award Name</th>
+                  <th>Order Number</th>
+                  <th>Total Score</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for adjudication in adjudications %}
+              <tr>
+                  <td>{{ adjudication.award_name }}</td>
+                  <td>{{ adjudication.order_num }}</td>
+                  <td>{{ adjudication.total_score }}</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
   </body>
-</html>
+  </html>
+  <style>
+    table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: rgb(255, 128, 234);
+    color: white;
+}
+  </style>

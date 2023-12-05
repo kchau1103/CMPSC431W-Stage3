@@ -34,7 +34,7 @@ CREATE TABLE Schedule (
     order_num INT AUTO_INCREMENT PRIMARY KEY,
     date DATE,
     call_time TIME,
-    song INT,
+    song VARCHAR(100),
     FOREIGN KEY (song) REFERENCES Set_List(entry_num)
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE Piece (
     size_category VARCHAR(50),
     age_group VARCHAR(50),
     style VARCHAR(50),
-    song INT,
+    song VARCHAR(100),
     award_name INT,
     PRIMARY KEY (order_num, studio_name), -- Composite primary key
     FOREIGN KEY (order_num) REFERENCES Schedule(order_num),

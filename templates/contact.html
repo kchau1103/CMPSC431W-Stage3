@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--CSS Styles -->
-    <link rel="stylesheet" href="/Users/kellychau/Desktop/stage3/assets/css/styles.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
     <!-- Animate CSS CDN -->
     <link
@@ -50,7 +50,7 @@
     
         <div class="row" style="display: flex;">
           <div class="column" style="flex: 1;">
-            <img src="/Users/kellychau/Desktop/stage3/pics/contact.jpg" style="width: 100%;">
+            <img src="{{ url_for('static', filename='pics/contact.jpg') }}" alt="logo" width="800">
           </div>
     
           <div class="column" style="flex: 1;">
