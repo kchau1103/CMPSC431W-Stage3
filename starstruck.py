@@ -237,10 +237,23 @@ def my_dancers():
     dancers = cursor.fetchall()  # Fetches all rows from the Dancer table
     return render_template('myDancers.html', dancers=dancers)
 
-@app.route('/edit_dancers')
+@app.route('/edit_dancers', methods=['GET', 'POST'])
 def edit_dancers():
+    dancer_name = request.args.get('name')  # Get the dancer name from URL parameters
+    db = get_db()
+    cursor = db.cursor()
 
-    return render_template('editDancers.html')
+    if request.method == 'POST':
+        new_age = request.form.get('age')
+        new_gender = request.form.get('gender')
+        cursor.execute("UPDATE Dancer SET age = ?, gender = ? WHERE name = ?", (new_age, new_gender, dancer_name))
+        db.commit()
+        return redirect(url_for('success'))
+
+    cursor.execute("SELECT * FROM Dancer WHERE name = ?", (dancer_name,))
+    dancer = cursor.fetchone()
+    cursor.close()
+    return render_template('editDancers.html', dancer=dancer)
 
 @app.route('/select_dancer_edit', methods=['GET', 'POST'])
 def select_dancer_edit():
@@ -248,14 +261,18 @@ def select_dancer_edit():
     if studio_name is None:
         return redirect(url_for('login'))
 
+    # Handle the POST request from the form submission
     if request.method == 'POST':
-        selected_dancer_id = request.form.get('dancer')
-        return redirect(url_for('edit_dancers', id=selected_dancer_id))
+        selected_dancer_name = request.form.get('dancer')
+        return redirect(url_for('edit_dancers', name=selected_dancer_name))
 
+    # Handle the GET request to display the form
     db = get_db()
     cursor = db.cursor()
     cursor.execute("SELECT name FROM Dancer WHERE studio_name = ?", (studio_name,))
     dancers = cursor.fetchall()
+    cursor.close()
+
     return render_template('selectEditDancer.html', dancers=dancers)
 
 @app.route('/my_adjudications')

@@ -51,15 +51,14 @@
   </nav>
 
   <h1>Select Dancer to Edit</h1>
-    <form action="{{ url_for('edit_dancers') }}" method="post">
-        <label for="dancer">Choose a Dancer:</label>
-        <select id="dancer" name="dancer">
-            {% for name in dancers %}
-                <option value="{{ id }}">{{ name }}</option>
-            {% endfor %}
-        </select>
-
-        <input type="submit" value="Edit Dancer">
-    </form>
+  <form action="{{ url_for('select_dancer_edit') }}" method="post">
+    <label for="dancer">Select Dancer:</label>
+    <select name="dancer" id="dancer">
+        {% for dancer in dancers %}
+            <option value="{{ dancer[0] }}">{{ dancer[0] }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Edit Dancer">
+</form>
 </body>
 </html>
