@@ -1,11 +1,12 @@
 #import modules
 from flask import Flask, render_template, request, redirect, url_for, g, session, jsonify, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 import pandas as pd
 import sqlite3
 import hashlib
 import logging
+
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -60,6 +61,31 @@ def about():
 def contact():
     return render_template('contact.html')
 
+@app.route('/judges')
+def judges():
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM Judges_Score")
+    judges = cursor.fetchall()  # Fetches all rows from the Judges_Score table
+    return render_template('judges.html', judges=judges)
+
+@app.route('/add_scores', methods=['POST'])
+def add_scores():
+    # Get data from form
+    judge_id = request.form['judge_id']
+    order_num = request.form['order_num']
+    score = request.form['score']
+
+    # Insert data into database
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("INSERT INTO Judges_Score (judge_id, order_num, score) VALUES (?, ?, ?)", (judge_id, order_num, score))
+    db.commit()
+    cursor.close()
+
+    # Redirect back to judges page
+    return redirect(url_for('judges'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -110,35 +136,11 @@ def register_studio():
 
 @app.route('/schedule')
 def schedule():
-    return render_template('schedule.html')
-
-
-# def generate_schedule_entry(song):
-#     db = get_db()
-#     cursor = db.cursor()
-
-#     # Fetch the latest date and call time from the Schedule table
-#     cursor.execute("SELECT MAX(date), MAX(call_time) FROM Schedule")
-#     latest_schedule = cursor.fetchone()
-#     latest_date, latest_call_time = latest_schedule if latest_schedule else (None, None)
-
-#     # Define logic for date and call time
-#     if not latest_date:
-#         # If no schedule exists yet, start from a predefined date and time
-#         new_date = datetime(2023, 1, 1)  # Example start date
-#         new_call_time = datetime.strptime("08:00:00", "%H:%M:%S").time()  # Example start time
-#     else:
-#         # Increment the call time, and if it's the end of the day, increment the date
-#         new_call_time = (datetime.combine(datetime.today(), latest_call_time) + timedelta(minutes=30)).time()  # Example increment
-#         new_date = latest_date
-#         if new_call_time.hour >= 20:  # Assuming end of day is 8 PM
-#             new_date += timedelta(days=1)
-#             new_call_time = datetime.strptime("08:00:00", "%H:%M:%S").time()  # Reset to start time
-
-#     # Insert new schedule entry
-#     cursor.execute("INSERT INTO Schedule (date, call_time, song) VALUES (?, ?, ?)", 
-#                    (new_date, new_call_time, song))
-#     db.commit()
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM Schedule")
+    schedules = cursor.fetchall()  # Fetches all rows from the Dancer table
+    return render_template('schedule.html', schedules=schedules)
 
 def get_size_category(age_group):
     age_category_map = {
@@ -174,13 +176,59 @@ def register_pieces():
         else:
             avg_age = 0
 
+        studio_name = session.get('studio_name')
+        amount_due = 100  # $100 charge for piece registration
+        registration_status = "Registered"
+        payment_status = "Pending"
+        paid = 0  # False, as the payment is just initiated
+        
         db = get_db()
         cursor = db.cursor()
-        
+
+        # Insert the payment entry into the Payment table
+        cursor.execute("""
+            INSERT INTO Payment (registration_status, studio_name, amount_due, paid, payment_status)
+            VALUES (?, ?, ?, ?, ?)
+            """, (registration_status, studio_name, amount_due, paid, payment_status))
+        db.commit()
+
         cursor.execute("""
             INSERT INTO Piece (studio_name, size_category, age_group, style, song) 
             VALUES (?, ?, ?, ?, ?)
             """, (studio_name, size_category, age_group, style, song))
+        db.commit()
+
+        duration_str = request.form.get('duration')  # Assuming 'duration' is in the format 'HH:MM:SS'
+        h, m, s = map(int, duration_str.split(':'))
+        song_duration = h * 60 + m  # Convert to total minutes
+
+        cursor.execute("SELECT MAX(call_time) FROM Schedule WHERE date = CURRENT_DATE")
+        last_call_time = cursor.fetchone()[0]
+
+        # Convert last_call_time from string to time object, if it is not None
+        if last_call_time is not None:
+            # Assuming last_call_time is in format "HH:MM:SS"
+            last_call_time_obj = datetime.strptime(last_call_time, '%H:%M:%S').time()
+        else:
+            last_call_time_obj = None
+
+        # Calculate next call time
+        if last_call_time_obj is None:
+            next_call_time = time(8, 0)  # Start at 8 AM if no entries for the day
+        else:
+            # Increment by the song's duration
+            full_datetime = datetime.combine(datetime.today(), last_call_time_obj)
+            next_call_time = (full_datetime + timedelta(minutes=song_duration)).time()
+
+        # Convert next_call_time to a string format
+        next_call_time_str = next_call_time.strftime('%H:%M:%S')
+
+        # Insert into Schedule table
+        cursor.execute("""
+            INSERT INTO Schedule (date, call_time, song)
+            VALUES (CURRENT_DATE, ?, ?)
+            """, (next_call_time_str, song))
+        db.commit()
 
         for i in range(len(first_name)):
             full_name = first_name[i] + " " + last_name[i]
@@ -188,21 +236,76 @@ def register_pieces():
                 INSERT INTO Dancer (studio_name, name, age, gender) 
                 VALUES (?, ?, ?, ?)
                 """, (studio_name, full_name, age[i], gender[i]))
+        db.commit()
 
         cursor.execute("""
             INSERT INTO Set_List (studio_name, num_dancers, style, registration_status, song_duration, avg_age, song)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (studio_name, num_dancers, style, registration_status, duration, avg_age, song))
-
+       
         db.commit()
         cursor.close()
         return redirect(url_for('success'))
-
     return render_template('registerPieces.html')
 
-@app.route('/my_payments')
+@app.route('/add_payment', methods=['POST'])
+def add_payment():
+    payment_id = request.form.get('paymentId')
+    pay_amount = request.form.get('payamount')
+
+    if not payment_id or not pay_amount:
+        flash("Please enter both payment ID and amount.", "error")
+        return redirect(url_for('my_payments'))
+
+    studio_name = session.get('studio_name')
+    if not studio_name:
+        return redirect(url_for('login'))
+
+    try:
+        pay_amount = float(pay_amount)
+    except ValueError:
+        flash("Invalid payment amount entered.", "error")
+        return redirect(url_for('my_payments'))
+
+    db = get_db()
+    cursor = db.cursor()
+
+    # Fetch the current amount due for the given payment ID
+    cursor.execute("SELECT amount_due FROM Payment WHERE payment_id = ? AND studio_name = ?", (payment_id, studio_name))
+    result = cursor.fetchone()
+
+    if result:
+        current_amount_due = result[0]
+        if pay_amount <= current_amount_due:
+            new_amount_due = current_amount_due - pay_amount
+            paid_status = new_amount_due <= 0
+            cursor.execute("UPDATE Payment SET amount_due = ?, paid = ? WHERE payment_id = ?", 
+                           (new_amount_due, paid_status, payment_id))
+            db.commit()
+            flash('Payment successful!', 'success')
+        else:
+            flash('Payment amount exceeds the amount due.', 'error')
+    else:
+        flash('Payment ID not found or does not belong to your studio.', 'error')
+
+    cursor.close()
+    return redirect(url_for('my_payments'))
+
+@app.route('/my_payments', methods=['GET'])
 def my_payments():
-    return render_template('myPayments.html')
+    studio_name = session.get('studio_name')
+    if studio_name is None:
+        return redirect(url_for('login'))
+
+    db = get_db()
+    cursor = db.cursor()
+
+    # Fetch all payments for the studio
+    cursor.execute("SELECT * FROM Payment WHERE studio_name = ?", (studio_name,))
+    payments = cursor.fetchall()
+    cursor.close()
+    print(payments)
+    return render_template('myPayments.html', payments=payments)
 
 @app.route('/my_setlist')
 def my_setlist():
@@ -277,14 +380,22 @@ def select_dancer_edit():
 
 @app.route('/my_adjudications')
 def my_adjudications():
-    # studio_name = session.get('studio_name')
-    # if studio_name is None:
-    #     return redirect(url_for('login'))  # Redirect to login if studio name is not in session
     db = get_db()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM Adjudication")
     adjudications = cursor.fetchall()  # Fetches all rows from the Dancer table
     return render_template('myAdjudications.html', adjudications=adjudications)
+
+@app.route('/my_schedule')
+def my_schedule():
+    studio_name = session.get('studio_name')
+    if studio_name is None:
+        return redirect(url_for('login'))  # Redirect to login if studio name is not in session
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM Schedule")
+    schedules = cursor.fetchall()  # Fetches all rows from the Dancer table
+    return render_template('mySchedule.html', schedules=schedules)
 
 if __name__ == '__main__':
     init_db() # initialize the database
