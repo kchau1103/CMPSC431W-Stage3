@@ -81,7 +81,7 @@ DROP TABLE IF EXISTS Payment;
 -- Payment Table
 CREATE TABLE Payment (
     payment_id INTEGER PRIMARY KEY,
-    registration_status TEXT,
+    registration_status BOOLEAN,
     studio_name TEXT,
     amount_due DECIMAL(10, 2),
     paid BOOLEAN,
