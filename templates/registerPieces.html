@@ -100,10 +100,10 @@
           <td><input type="text" name="song" placeholder="Into The Night" style="font-size: 16px; width: 90%; margin-right: 200px;" required ></td>
 
           <td><label for="duration" style="font-size: 18px;"><b>Song Duration:</b></label></td>
-          <td><input type="text" name="duration" style="font-size: 16px; width: 80%;" required></td>
+          <td><input type="text" name="duration" placeholder="hh:mm:ss" style="font-size: 16px; width: 80%;" required></td>
 
           <td><label for="style" style="font-size: 18px;"><b>Style:</b></label></td>
-          <td><input type="text" name="style" style="font-size: 16px; width: 100%;" required></td>
+          <td><input type="text" name="style" placeholder="Contemporary" style="font-size: 16px; width: 100%;" required></td>
         <tr>
       </table>
 
@@ -138,13 +138,13 @@
         <td><input type="number" name="numDancers" style="font-size: 16px; width: 50%;" min="0" required></td>
       </tr> -->
         <td><label for="fname" style="font-size: 18px;"><b>First Name:</b></label></td>
-        <td><input type="text" name="fname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required></td>
+        <td><input type="text" name="fname[]" placeholder="John" style ="font-size: 16px; width: 80%; margin-right: 70px;" required></td>
 
         <td><label for="lname" style="font-size: 18px;"><b>Last Name:</b></label></td>
-        <td><input type="text" name="lname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required></td>
+        <td><input type="text" name="lname[]" placeholder="Smith" style="font-size: 16px; width: 80%; margin-right: 70px;" required></td>
 
         <td><label for="age" style="font-size: 18px;"><b>Age:</b></label></td>
-        <td><input type="number" name="age[]" style="font-size: 16px; width: 50%;" min="8"required></td>
+        <td><input type="number" name="age[]" placeholder="8" style="font-size: 16px; width: 50%;" min="8"required></td>
         
         <td><label for="gender" style="font-size: 18px;"><b>Gender:</b></label></td>
         <td>
@@ -189,7 +189,7 @@
     cell3.innerHTML = '<label for="lname" style="font-size: 18px;"><b>Last Name:</b></label>';
     cell4.innerHTML = '<input type="text" name="lname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required>';
     cell5.innerHTML = '<label for="age" style="font-size: 18px;"><b>Age:</b></label>';
-    cell6.innerHTML = '<input type="number" name="age[]" style="font-size: 16px; width: 50%;" required>';
+    cell6.innerHTML = '<input type="number" name="age[]" style="font-size: 16px; width: 50%;" min="8" required>';
     cell7.innerHTML = '<label for="gender" style="font-size: 18px;"><b>Gender:</b></label>';
     cell8.innerHTML = `
       <select name="gender[]" style="font-size: 16px; width: 100%;">

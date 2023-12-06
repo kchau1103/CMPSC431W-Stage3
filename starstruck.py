@@ -275,38 +275,6 @@ def register_pieces():
             """, (registration_status, studio_name, amount_due, paid, payment_status))
         db.commit()
 
-        duration_str = request.form.get('duration')  # Assuming 'duration' is in the format 'HH:MM:SS'
-        h, m, s = map(int, duration_str.split(':'))
-        song_duration = h * 60 + m  # Convert to total minutes
-
-        cursor.execute("SELECT MAX(call_time) FROM Schedule WHERE date = CURRENT_DATE")
-        last_call_time = cursor.fetchone()[0]
-
-        # Convert last_call_time from string to time object, if it is not None
-        if last_call_time is not None:
-            # Assuming last_call_time is in format "HH:MM:SS"
-            last_call_time_obj = datetime.strptime(last_call_time, '%H:%M:%S').time()
-        else:
-            last_call_time_obj = None
-
-        # Calculate next call time
-        if last_call_time_obj is None:
-            next_call_time = time(8, 0)  # Start at 8 AM if no entries for the day
-        else:
-            # Increment by the song's duration
-            full_datetime = datetime.combine(datetime.today(), last_call_time_obj)
-            next_call_time = (full_datetime + timedelta(minutes=song_duration)).time()
-
-        # Convert next_call_time to a string format
-        next_call_time_str = next_call_time.strftime('%H:%M:%S')
-
-        # Insert into Schedule table
-        cursor.execute("""
-            INSERT INTO Schedule (date, call_time, song)
-            VALUES (CURRENT_DATE, ?, ?)
-            """, (next_call_time_str, song))
-        db.commit()
-
         for i in range(len(first_name)):
             full_name = first_name[i] + " " + last_name[i]
             cursor.execute("""
@@ -346,28 +314,62 @@ def add_payment():
 
     db = get_db()
     cursor = db.cursor()
+
     try:
         cursor.execute("SELECT amount_due, paid FROM Payment WHERE payment_id = ? AND studio_name = ?", (payment_id, studio_name))
         result = cursor.fetchone()
 
         if result:
             current_amount_due, already_paid = result
+            new_amount_due = current_amount_due - pay_amount
+            paid_status = new_amount_due <= 0
+            payment_status = "Paid" if paid_status else "Pending"
 
             # Start a transaction
             cursor.execute("BEGIN;")
 
-            if pay_amount <= current_amount_due and not already_paid:
-                new_amount_due = current_amount_due - pay_amount
-                paid_status = new_amount_due <= 0
-                payment_status = "Paid" if paid_status else "Pending"
+            # Update paid status, registration status, and payment status
+            cursor.execute("UPDATE Payment SET amount_due = ?, paid = ?, registration_status = ?, payment_status = ? WHERE payment_id = ?", 
+                           (new_amount_due, paid_status, paid_status, payment_status, payment_id))
 
-                # Update paid status, registration status, and payment status
-                cursor.execute("UPDATE Payment SET amount_due = ?, paid = ?, registration_status = ?, payment_status = ? WHERE payment_id = ?", 
-                               (new_amount_due, paid_status, paid_status, payment_status, payment_id))
-
+            if paid_status and not already_paid:
                 # Update registration status in Set_List table if payment is completed
-                if paid_status:
-                    cursor.execute("UPDATE Set_List SET registration_status = TRUE WHERE studio_name = ?", (studio_name,))
+                cursor.execute("UPDATE Set_List SET registration_status = TRUE WHERE studio_name = ?", (studio_name,))
+
+                # Fetch the song's duration for the pieces that need to be scheduled
+                cursor.execute("SELECT song_duration FROM Set_List WHERE studio_name = ? AND registration_status = TRUE", (studio_name,))
+                song_duration_results = cursor.fetchall()
+
+                for duration_str in song_duration_results:
+                    if duration_str[0]:
+                        h, m, s = map(int, duration_str[0].split(':'))
+                        song_duration = h * 60 + m
+                        duration_str = request.form.get('duration')  # Assuming 'duration' is in the format 'HH:MM:SS'
+                        h, m, s = map(int, duration_str.split(':'))
+                        song_duration = h * 60 + m  # Convert to total minutes
+                        cursor.execute("SELECT MAX(call_time) FROM Schedule WHERE date = CURRENT_DATE")
+                        last_call_time = cursor.fetchone()[0]
+                        # Convert last_call_time from string to time object, if it is not None
+                        if last_call_time is not None:
+                            # Assuming last_call_time is in format "HH:MM:SS"
+                            last_call_time_obj = datetime.strptime(last_call_time, '%H:%M:%S').time()
+                        else:  
+                            last_call_time_obj = None
+                        # Calculate next call time
+                        if last_call_time_obj is None:
+                            next_call_time = time(8, 0)  # Start at 8 AM if no entries for the day
+                        else:
+                            # Increment by the song's duration
+                            full_datetime = datetime.combine(datetime.today(), last_call_time_obj)
+                            next_call_time = (full_datetime + timedelta(minutes=song_duration)).time()
+                        # Convert next_call_time to a string format
+                        next_call_time_str = next_call_time.strftime('%H:%M:%S')
+                        # Insert into Schedule table
+                        cursor.execute("""
+                            INSERT INTO Schedule (date, call_time, song)
+                            VALUES (CURRENT_DATE, ?, ?)
+                            """, (next_call_time_str, song))
+                        db.commit()
 
                 # Commit if the payment amount is correct
                 db.commit()
@@ -535,6 +537,32 @@ def my_schedule():
     schedules = cursor.fetchall()  # Fetches all rows from the Dancer table
     return render_template('mySchedule.html', schedules=schedules)
 
+@app.route('/piece_details')
+def piece_details():
+    db = get_db()
+    cursor = db.cursor()
+
+    # Joining the tables to get comprehensive details for each piece
+    cursor.execute("""
+        SELECT 
+            Studio.studio_name, Studio.city, Studio.state,
+            Piece.style, Piece.age_group, Piece.song, Piece.award_name,
+            Dancer.name, Dancer.age, Dancer.gender,
+            Schedule.date, Schedule.call_time,
+            Judges_Score.judge_id, Judges_Score.score,
+            Adjudication.total_score, Adjudication.award_name
+        FROM Piece
+        JOIN Studio ON Piece.studio_name = Studio.studio_name
+        JOIN Dancer ON Piece.order_num = Dancer.order_num
+        JOIN Schedule ON Piece.order_num = Schedule.order_num
+        JOIN Judges_Score ON Piece.order_num = Judges_Score.order_num
+        JOIN Adjudication ON Piece.award_name = Adjudication.award_name
+    """)
+    details = cursor.fetchall()
+    cursor.close()
+    return render_template('pieceDetails.html', details=details)
+
 if __name__ == '__main__':
     init_db() # initialize the database
     app.run(debug=True, port=5001)  # Runs on http://127.0.0.1:5000 by default
+    

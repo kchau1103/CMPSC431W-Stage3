@@ -1,0 +1,148 @@
+<!-- registerPieces.html-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--CSS Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <!-- Animate CSS CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <title>Starstruck Dance Competition</title>
+
+    <style>
+      /* Custom CSS */
+      h1 {
+        font-size: 48px; /* Adjust the font size to your preference */
+      }
+
+      .form-row {
+      margin-bottom: 15px; /* Spacing between each row */
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px; /* Spacing below each label */
+      }
+
+      input, select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px; /* Spacing below each input field */
+      }
+      #flash-messages .alert {
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+
+    .alert-error {
+        background-color: #000000;
+        border-color: #000000;
+        color: #ffffff;
+    }
+
+    .alert-success {
+        background-color: #000000;
+        border-color: #000000;
+        color: #ffffff;
+    }
+      </style>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav>
+      <body style="background-color:rgb(0, 0, 0);"></body>
+      <h1>
+        <a href="/">Starstruck Dance Competition</a>
+      </h1>
+
+      <ul class="navigation bar">
+        <a href="about" class="nav-link">About Us</a>
+        <a href="contact" class="nav-link">Contact</a>
+        <a href="register_studio" class="nav-link">Register</a>
+        <a href="schedule" class="nav-link">Schedule</a>
+        <a href="judges" class="nav-link">Judges</a>
+        <a href="login" class="nav-link">Login</a>
+      </ul>
+    </nav>
+
+  </section>
+    <div class="container signin" style="color:rgb(255, 131, 208);">
+      <p><a href="/login_choices">Back to My Information </a>.</p>
+    </div>
+  </section>
+  
+<body>
+    <h1 style="color:rgb(255, 131, 208);">Dance Piece Details</h1>
+    <table border="1">
+        <tr>
+            <th>Studio Name</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Style</th>
+            <th>Age Group</th>
+            <th>Song</th>
+            <th>Award Name</th>
+            <th>Dancer Name</th>
+            <th>Dancer Age</th>
+            <th>Dancer Gender</th>
+            <th>Schedule Date</th>
+            <th>Call Time</th>
+            <th>Judge ID</th>
+            <th>Score</th>
+            <th>Total Score</th>
+            <th>Adjudication Award</th>
+        </tr>
+        {% for detail in details %}
+            <tr>
+                <td>{{ detail[0] }}</td>
+                <td>{{ detail[1] }}</td>
+                <td>{{ detail[2] }}</td>
+                <td>{{ detail[3] }}</td>
+                <td>{{ detail[4] }}</td>
+                <td>{{ detail[5] }}</td>
+                <td>{{ detail[6] }}</td>
+                <td>{{ detail[7] }}</td>
+                <td>{{ detail[8] }}</td>
+                <td>{{ detail[9] }}</td>
+                <td>{{ detail[10] }}</td>
+                <td>{{ detail[11] }}</td>
+                <td>{{ detail[12] }}</td>
+                <td>{{ detail[13] }}</td>
+                <td>{{ detail[14] }}</td>
+                <td>{{ detail[15] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+
+<style>
+  table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  color: #ffffff
+}
+
+th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: rgb(255, 128, 234);
+  color: white;
+}
+</style>
