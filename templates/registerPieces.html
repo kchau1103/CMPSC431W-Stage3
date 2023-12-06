@@ -21,7 +21,22 @@
       h1 {
         font-size: 48px; /* Adjust the font size to your preference */
       }
-    </style>
+
+      .form-row {
+      margin-bottom: 15px; /* Spacing between each row */
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px; /* Spacing below each label */
+      }
+
+      input, select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px; /* Spacing below each input field */
+      }
+      </style>
   </head>
 
   <body>
@@ -54,47 +69,55 @@
       <h1 style="color:rgb(255, 131, 208);">Piece:</h1>
         <tr>
           <td><label for="song" style="font-size: 18px;"><b>Song:</b></label></td>
-          <td><input type="text" name="song" style="font-size: 16px; width: 100%;" required></td>
-  
+          <td><input type="text" name="song" style="font-size: 16px; width: 90%; margin-right: 200px;" required ></td>
+
           <td><label for="duration" style="font-size: 18px;"><b>Song Duration:</b></label></td>
-          <td><input type="text" name="duration" style="font-size: 16px; width: 100%;" required></td>
+          <td><input type="text" name="duration" style="font-size: 16px; width: 80%;" required></td>
 
           <td><label for="style" style="font-size: 18px;"><b>Style:</b></label></td>
           <td><input type="text" name="style" style="font-size: 16px; width: 100%;" required></td>
-        </tr>
         <tr>
-          <td>
-              <label for="ageGroup" style="font-size: 18px;"><b>Age Group:</b></label>
-          </td>
-          <td>
-              <input type="radio" id="age8-10" name="ageGroup" value="8-10">
-              <label for="age8-10">8 AND 10</label>
-              <input type="radio" id="age11-12" name="ageGroup" value="11-12">
-              <label for="age11-12">11 AND 12</label>
-              <input type="radio" id="age13-15" name="ageGroup" value="13-15">
-              <label for="age13-15">13 AND 15</label>
-              <input type="radio" id="age16-19" name="ageGroup" value="16-19">
-              <label for="age16-19">16 AND 19</label>
-          </td>
-      </tr>
-    </table>
+      </table>
+
+        <div style="display: flex; color:rgb(255, 255, 255); font-size: 18px;">
+          <label for="ageGroup" style="font-size: 18px; margin-right: 10px;"><b>Age Group:</b></label>
+
+          <div style="margin-right: 30px;">
+            <input type="radio" id="age8-10" name="ageGroup" value="8-10">
+            <label for="age8-10">8-10</label>
+          </div>
+          
+          <div style="margin-right: 30px;">
+            <input type="radio" id="age11-12" name="ageGroup" value="11-12">
+            <label for="age11-12">11-12</label>
+          </div>
+          
+          <div style="margin-right: 30px;">
+            <input type="radio" id="age13-15" name="ageGroup" value="13-15">
+            <label for="age13-15">13-15</label>
+          </div>
+          
+          <div>
+            <input type="radio" id="age16-19" name="ageGroup" value="16-19">
+            <label for="age16-19">16-19</label>
+          </div>
+        </div>
 
     <h1 style="color:rgb(255, 131, 208);">Dancers:</h1>
     <table id="peopleTable" style="color:rgb(255, 255, 255); margin-bottom: 20px;">
       <tr>
         <td><label for="numDancers" style="font-size: 18px;"><b>Number of Dancers:</b></label></td>
-        <td><input type="text" name="numDancers" style="font-size: 16px; width: 100%;" required></td>
+        <td><input type="number" name="numDancers" style="font-size: 16px; width: 50%;" min="0" required></td>
       </tr>
-      <tr>
         <td><label for="fname" style="font-size: 18px;"><b>First Name:</b></label></td>
-        <td><input type="text" name="fname[]" style="font-size: 16px; width: 100%;" required></td>
+        <td><input type="text" name="fname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required></td>
 
         <td><label for="lname" style="font-size: 18px;"><b>Last Name:</b></label></td>
-        <td><input type="text" name="lname[]" style="font-size: 16px; width: 100%;" required></td>
+        <td><input type="text" name="lname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required></td>
 
         <td><label for="age" style="font-size: 18px;"><b>Age:</b></label></td>
-        <td><input type="number" name="age[]" style="font-size: 16px; width: 100%;" required></td>
-
+        <td><input type="number" name="age[]" style="font-size: 16px; width: 50%;" min="8"required></td>
+        
         <td><label for="gender" style="font-size: 18px;"><b>Gender:</b></label></td>
         <td>
           <select name="gender[]" style="font-size: 16px; width: 100%;">
@@ -127,11 +150,11 @@
       const cell8 = newRow.insertCell(7);
       
       cell1.innerHTML = '<label for="fname" style="font-size: 18px;"><b>First Name:</b></label>';
-      cell2.innerHTML = '<input type="text" name="fname[]" style="font-size: 16px; width: 100%;" required>';
+      cell2.innerHTML = '<input type="text" name="fname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required>';
       cell3.innerHTML = '<label for="lname" style="font-size: 18px;"><b>Last Name:</b></label>';
-      cell4.innerHTML = '<input type="text" name="lname[]" style="font-size: 16px; width: 100%;" required>';
+      cell4.innerHTML = '<input type="text" name="lname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required>';
       cell5.innerHTML = '<label for="age" style="font-size: 18px;"><b>Age:</b></label>';
-      cell6.innerHTML = '<input type="number" name="age[]" style="font-size: 16px; width: 100%;" required>';
+      cell6.innerHTML = '<input type="number" name="age[]" style="font-size: 16px; width: 50%;" required>';
       cell7.innerHTML = '<label for="gender" style="font-size: 18px;"><b>Gender:</b></label>';
       cell8.innerHTML = `
         <select name="gender[]" style="font-size: 16px; width: 100%;">
@@ -139,6 +162,15 @@
           <option value="female">Female</option>
           <option value="other">Other</option>
         </select>`;
+
+        // Add a cell for the remove button
+        const removeCell = newRow.insertCell(-1);
+        removeCell.innerHTML = '<button type="button" onclick="removePerson(this)" style="font-size: 16px;">Remove</button>';
+    }
+
+    function removePerson(button) {
+      const row = button.parentNode.parentNode; // button -> td -> tr
+      row.parentNode.removeChild(row);
     }
   </script>
 </section>
