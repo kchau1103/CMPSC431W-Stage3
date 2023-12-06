@@ -217,17 +217,26 @@ def register_pieces():
         studio_name = session.get('studio_name')
         if studio_name is None:
             return redirect(url_for('login'))
-        age_group = request.form['ageGroup']
-
+        # Age group validation dictionary
         valid_age_ranges = {
-            '8-10': range(8, 11),
-            '11-12': range(11, 13),
-            # Add other age groups
+            "8-10": range(8, 11),
+            "11-12": range(11, 13),
+            "13-15": range(13, 16),
+            "16-19": range(16, 20)
         }
 
+        age_group = request.form.get('ageGroup')
+        age = request.form.getlist('age[]')
+
+        # Ensure the age_group is in valid_age_ranges
+        if age_group not in valid_age_ranges:
+            flash('Invalid age group selected.', 'error')
+            return redirect(url_for('register_pieces'))
+
         for a1 in age:
-            if int(a1) not in valid_age_ranges[age_group]:
-                flash(f'Age {a1} is not within the selected age group {age_group}.', 'error')
+            # Ensure age is a digit and within the valid range
+            if a1.isdigit() and int(a1) not in valid_age_ranges[age_group]:
+                flash('Age not within selected age group range.', 'error')
                 return redirect(url_for('register_pieces'))
         
         if age:
