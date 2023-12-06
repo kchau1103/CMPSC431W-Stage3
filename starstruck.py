@@ -16,7 +16,7 @@ app.secret_key = 'secretkey'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
 
 #set host
-host = 'https://127.0.0.1:5000/'
+host = 'http://127.0.0.1:5001/'
 
 DATABASE = 'starstuck.db'
 #set up database
