@@ -1,88 +1,84 @@
-<!-- registerPieces.html-->
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!--CSS Styles -->
+    <!-- CSS Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
     <!-- Animate CSS CDN -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-    />
-    <title>Starstruck Dance Competition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
+    <!-- Custom CSS -->
     <style>
-      /* Custom CSS */
-      h1 {
-        font-size: 48px; /* Adjust the font size to your preference */
-      }
+        h1 {
+            font-size: 48px;
+        }
+        .form-row {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        #flash-messages .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-error, .alert-success {
+            background-color: #000000;
+            border-color: #000000;
+            color: #ffffff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            color: #ffffff
+        }
+        th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: rgb(255, 128, 234);
+            color: white;
+        }
+    </style>
 
-      .form-row {
-      margin-bottom: 15px; /* Spacing between each row */
-      }
+    <title>Starstruck Dance Competition - Piece Details</title>
+</head>
 
-      label {
-        display: block;
-        margin-bottom: 5px; /* Spacing below each label */
-      }
-
-      input, select {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px; /* Spacing below each input field */
-      }
-      #flash-messages .alert {
-        padding: 10px;
-        margin: 10px 0;
-        border: 1px solid transparent;
-        border-radius: 4px;
-    }
-
-    .alert-error {
-        background-color: #000000;
-        border-color: #000000;
-        color: #ffffff;
-    }
-
-    .alert-success {
-        background-color: #000000;
-        border-color: #000000;
-        color: #ffffff;
-    }
-      </style>
-  </head>
-
-  <body>
+<body style="background-color:rgb(0, 0, 0); color:rgb(255, 131, 208);">
     <!-- Navbar -->
     <nav>
-      <body style="background-color:rgb(0, 0, 0);"></body>
-      <h1>
-        <a href="/">Starstruck Dance Competition</a>
-      </h1>
-
-      <ul class="navigation bar">
-        <a href="about" class="nav-link">About Us</a>
-        <a href="contact" class="nav-link">Contact</a>
-        <a href="register_studio" class="nav-link">Register</a>
-        <a href="schedule" class="nav-link">Schedule</a>
-        <a href="judges" class="nav-link">Judges</a>
-        <a href="login" class="nav-link">Login</a>
-      </ul>
+        <h1><a href="/">Starstruck Dance Competition</a></h1>
+        <ul class="navigation bar">
+            <a href="about" class="nav-link">About Us</a>
+            <a href="contact" class="nav-link">Contact</a>
+            <a href="register_studio" class="nav-link">Register</a>
+            <a href="schedule" class="nav-link">Schedule</a>
+            <a href="judges" class="nav-link">Judges</a>
+            <a href="login" class="nav-link">Login</a>
+        </ul>
     </nav>
 
-  </section>
-    <div class="container signin" style="color:rgb(255, 131, 208);">
-      <p><a href="/login_choices">Back to My Information </a>.</p>
+    <div class="container signin">
+        <p><a href="/login_choices">Back to My Information </a>.</p>
     </div>
-  </section>
-  
-<body>
-    <h1 style="color:rgb(255, 131, 208);">Dance Piece Details</h1>
+
+    <h1>Dance Piece Details</h1>
     <table border="1">
         <tr>
             <th>Studio Name</th>
@@ -125,24 +121,3 @@
     </table>
 </body>
 </html>
-
-<style>
-  table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  color: #ffffff
-}
-
-th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: rgb(255, 128, 234);
-  color: white;
-}
-</style>

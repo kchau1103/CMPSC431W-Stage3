@@ -9,7 +9,7 @@ CREATE TABLE Studio (
 DROP TABLE IF EXISTS Set_List;
 -- Set_List Table
 CREATE TABLE Set_List (
-    entry_num INTEGER PRIMARY KEY,
+    entry_num INTEGER,
     studio_name TEXT,
     num_dancers INT,
     style TEXT,
@@ -17,6 +17,7 @@ CREATE TABLE Set_List (
     song_duration TIME,
     avg_age INT,
     song TEXT,
+    PRIMARY KEY (entry_num, song),
     FOREIGN KEY (studio_name) REFERENCES Studio(studio_name)
 );
 
@@ -38,7 +39,7 @@ CREATE TABLE Dancer (
     age INT,
     gender TEXT,
     order_num INTEGER,
-    PRIMARY KEY (studio_name, name),
+    PRIMARY KEY (studio_name, name, order_num),
     FOREIGN KEY (studio_name) REFERENCES Studio(studio_name),
     FOREIGN KEY (order_num) REFERENCES Schedule(order_num)
 );
@@ -71,9 +72,10 @@ CREATE TABLE Judges_Score (
 DROP TABLE IF EXISTS Adjudication;
 -- Adjudication Table
 CREATE TABLE Adjudication (
-    award_name TEXT PRIMARY KEY,
+    award_name TEXT,
     order_num INTEGER,
     total_score DECIMAL(5, 2),
+    PRIMARY KEY (award_name, order_num)
     FOREIGN KEY (order_num) REFERENCES Piece(order_num)
 );
 

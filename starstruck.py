@@ -321,66 +321,58 @@ def add_payment():
 
         if result:
             current_amount_due, already_paid = result
-            new_amount_due = current_amount_due - pay_amount
-            paid_status = new_amount_due <= 0
-            payment_status = "Paid" if paid_status else "Pending"
+            # Check if the payment amount is greater than the amount due
+        if pay_amount > current_amount_due:
+            flash('Payment amount exceeds the amount due.', 'error')
+            return redirect(url_for('my_payments'))
 
-            # Start a transaction
-            cursor.execute("BEGIN;")
+        # Calculate the new amount due after the payment
+        new_amount_due = current_amount_due - pay_amount
 
-            # Update paid status, registration status, and payment status
-            cursor.execute("UPDATE Payment SET amount_due = ?, paid = ?, registration_status = ?, payment_status = ? WHERE payment_id = ?", 
-                           (new_amount_due, paid_status, paid_status, payment_status, payment_id))
+        # Determine if the payment completes the due amount
+        paid_status = new_amount_due <= 0
+        payment_status = "Paid" if paid_status else "Pending"
 
-            if paid_status and not already_paid:
-                # Update registration status in Set_List table if payment is completed
-                cursor.execute("UPDATE Set_List SET registration_status = TRUE WHERE studio_name = ?", (studio_name,))
+        # Update Payment table
+        cursor.execute("UPDATE Payment SET amount_due = ?, paid = ?, payment_status = ?, registration_status = ? WHERE payment_id = ?", 
+                    (new_amount_due, paid_status, payment_status, paid_status, payment_id))
 
-                # Fetch the song's duration for the pieces that need to be scheduled
-                cursor.execute("SELECT song_duration FROM Set_List WHERE studio_name = ? AND registration_status = TRUE", (studio_name,))
-                song_duration_results = cursor.fetchall()
+        if paid_status:
+            # Fetch the song details for scheduling
+            cursor.execute("SELECT song, song_duration FROM Set_List WHERE studio_name = ? AND registration_status = 'Registered'", (studio_name,))
+            songs_to_schedule = cursor.fetchall()
 
-                for duration_str in song_duration_results:
-                    if duration_str[0]:
-                        h, m, s = map(int, duration_str[0].split(':'))
-                        song_duration = h * 60 + m
-                        duration_str = request.form.get('duration')  # Assuming 'duration' is in the format 'HH:MM:SS'
-                        h, m, s = map(int, duration_str.split(':'))
-                        song_duration = h * 60 + m  # Convert to total minutes
-                        cursor.execute("SELECT MAX(call_time) FROM Schedule WHERE date = CURRENT_DATE")
-                        last_call_time = cursor.fetchone()[0]
-                        # Convert last_call_time from string to time object, if it is not None
-                        if last_call_time is not None:
-                            # Assuming last_call_time is in format "HH:MM:SS"
-                            last_call_time_obj = datetime.strptime(last_call_time, '%H:%M:%S').time()
-                        else:  
-                            last_call_time_obj = None
-                        # Calculate next call time
-                        if last_call_time_obj is None:
-                            next_call_time = time(8, 0)  # Start at 8 AM if no entries for the day
-                        else:
-                            # Increment by the song's duration
-                            full_datetime = datetime.combine(datetime.today(), last_call_time_obj)
-                            next_call_time = (full_datetime + timedelta(minutes=song_duration)).time()
-                        # Convert next_call_time to a string format
-                        next_call_time_str = next_call_time.strftime('%H:%M:%S')
-                        # Insert into Schedule table
-                        cursor.execute("""
-                            INSERT INTO Schedule (date, call_time, song)
-                            VALUES (CURRENT_DATE, ?, ?)
-                            """, (next_call_time_str, song))
-                        db.commit()
-
-                # Commit if the payment amount is correct
-                db.commit()
-                flash('Payment successful!', 'success')
+            # Get the last call time for the current date
+            cursor.execute("SELECT MAX(call_time) FROM Schedule WHERE date = CURRENT_DATE")
+            last_call_time_str = cursor.fetchone()[0]
+            current_date = datetime.today().date()
+            if last_call_time_str:
+                last_call_time = datetime.strptime(last_call_time_str, '%H:%M:%S').time()
+                next_call_time = datetime.combine(current_date, last_call_time)
             else:
-                # Rollback the transaction if the payment amount is incorrect
-                db.rollback()
-                flash('Payment amount exceeds the amount due or payment already completed.', 'error')
+                next_call_time = datetime.combine(current_date, time(8, 0))  # Start at 8 AM if no entries for the day
+
+            for song_name, duration_str in songs_to_schedule:
+                if duration_str:
+                    h, m, s = map(int, duration_str.split(':'))
+                    song_duration = h * 60 + m
+                    next_call_time = next_call_time + timedelta(minutes=song_duration)
+                    next_call_time_str = next_call_time.time().strftime('%H:%M:%S')
+
+                    # Insert into Schedule table
+                    cursor.execute("INSERT INTO Schedule (date, call_time, song) VALUES (CURRENT_DATE, ?, ?)", (next_call_time_str, song_name))
+             
+            # Optionally, update registration status in Set_List table if payment is completed
+            cursor.execute("UPDATE Set_List SET registration_status = TRUE WHERE studio_name = ?", (studio_name,))
+
+            # Commit the transaction after all updates
+            db.commit()
+            flash('Payment successful!', 'success')
         else:
-            flash('Payment ID not found or does not belong to your studio.', 'error')
-            db.rollback()
+            # If the payment doesn't complete the due amount
+            flash('Partial payment recorded. Remaining amount due: ${:.2f}'.format(new_amount_due), 'info')
+            db.commit()
+
     except Exception as e:
         db.rollback()
         flash(f"An error occurred: {e}", "error")
@@ -533,7 +525,7 @@ def my_schedule():
         return redirect(url_for('login'))  # Redirect to login if studio name is not in session
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM Schedule")
+    cursor.execute("SELECT * FROM Schedule ORDER BY (date)")
     schedules = cursor.fetchall()  # Fetches all rows from the Dancer table
     return render_template('mySchedule.html', schedules=schedules)
 
@@ -542,27 +534,30 @@ def piece_details():
     db = get_db()
     cursor = db.cursor()
 
-    # Joining the tables to get comprehensive details for each piece
-    cursor.execute("""
-        SELECT 
-            Studio.studio_name, Studio.city, Studio.state,
-            Piece.style, Piece.age_group, Piece.song, Piece.award_name,
-            Dancer.name, Dancer.age, Dancer.gender,
-            Schedule.date, Schedule.call_time,
-            Judges_Score.judge_id, Judges_Score.score,
-            Adjudication.total_score, Adjudication.award_name
-        FROM Piece
-        JOIN Studio ON Piece.studio_name = Studio.studio_name
-        JOIN Dancer ON Piece.order_num = Dancer.order_num
-        JOIN Schedule ON Piece.order_num = Schedule.order_num
-        JOIN Judges_Score ON Piece.order_num = Judges_Score.order_num
-        JOIN Adjudication ON Piece.award_name = Adjudication.award_name
-    """)
-    details = cursor.fetchall()
+    try:
+        # Joining the tables to get comprehensive details for each piece
+        cursor.execute("""
+            SELECT 
+                Studio.studio_name, Studio.city, Studio.state,
+                Piece.style, Piece.age_group, Piece.song, Piece.award_name,
+                Dancer.name, Dancer.age, Dancer.gender,
+                Schedule.date, Schedule.call_time,
+                Judges_Score.judge_id, Judges_Score.score,
+                Adjudication.total_score, Adjudication.award_name
+            FROM Piece
+            INNER JOIN Studio ON Piece.studio_name = Studio.studio_name
+            INNER JOIN Dancer ON Piece.order_num = Dancer.order_num
+            INNER JOIN Schedule ON Piece.order_num = Schedule.order_num
+            INNER JOIN Judges_Score ON Piece.order_num = Judges_Score.order_num
+            INNER JOIN Adjudication ON Piece.order_num = Adjudication.order_num
+        """)
+        details = cursor.fetchall()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        details = []
+
     cursor.close()
     return render_template('pieceDetails.html', details=details)
-
 if __name__ == '__main__':
     init_db() # initialize the database
     app.run(debug=True, port=5001)  # Runs on http://127.0.0.1:5000 by default
-    
