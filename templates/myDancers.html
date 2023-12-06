@@ -82,9 +82,14 @@
   <br><br><br>
   <section>
     <div class="button-container">
-      <a href="select_dancer_edit" class="large-button" height: auto>Edit Dancers </a> 
+      <a href="{{ url_for('select_dancer_edit') }}" class="large-button">Edit Dancers</a> 
     </div>
   </section>
+  <br>
+  <section>
+    <div class="button-container">
+      <a href="{{ url_for('select_delete_dancer') }}" class="large-button">Delete Dancers</a> 
+    </div>
 </html>
 
 

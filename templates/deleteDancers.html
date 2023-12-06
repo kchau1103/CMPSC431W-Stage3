@@ -51,21 +51,28 @@
     </ul>
   </nav>
 
-    </section>
-        <div class="container signin" style="color:rgb(255, 131, 208);">
-            <p><a href="/login_choices">Back to My Information </a>.</p>
-        </div>
-    </section>
+  </section>
+    <div class="container signin" style="color:rgb(255, 131, 208);">
+      <p><a href="/login_choices">Back to My Information </a>.</p>
+    </div>
+  </section>
 
-  <form action="{{ url_for('select_dancer_edit') }}" method="post" required>
-    <h1>Select Dancer to Edit</h1>
-    <label for="dancer">Select Dancer:</label>
-    <select name="dancer" id="dancer">
+  <form action="{{ url_for('delete_dancer') }}" method="post" >
+    <h1>Select Dancer to Delete</h1>
+    <label for="dancer_to_delete">Dancer Name:</label>
+    <select name="dancer_to_delete" id="dancer_to_delete" required>
         {% for dancer in dancers %}
             <option value="{{ dancer[0] }}">{{ dancer[0] }}</option>
         {% endfor %}
     </select>
-    <input type="submit" value="Edit Dancer">
-    </form>
-</body>
-</html>
+
+    <label for="ordernum_to_delete">Order Number of Piece:</label>
+    <select name="ordernum_to_delete" id="ordernum_to_delete" >
+        {% for piece in pieces %}
+            <option value="{{ piece[0] }}">{{ piece[0] }}</option>
+            <!-- Assuming piece[0] is the order number and piece[1] is some descriptive text -->
+        {% endfor %}
+    </select>
+
+    <input type="submit" value="Delete Dancer">
+</form>

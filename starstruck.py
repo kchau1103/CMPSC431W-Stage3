@@ -404,12 +404,15 @@ def select_delete_dancer():
     cursor = db.cursor()
     cursor.execute("SELECT name FROM Dancer WHERE studio_name = ?", (studio_name,))
     dancers = cursor.fetchall()
+    cursor.close()
 
+    db = get_db()
+    cursor = db.cursor()
     cursor.execute("SELECT * FROM Piece")  # Fetch pieces
     pieces = cursor.fetchall()
     cursor.close()
 
-    return render_template('myDancers.html', dancers=dancers, pieces=pieces)
+    return render_template('deleteDancers.html', dancers=dancers, pieces=pieces)
 
 # Route to handle the deletion of dancers
 @app.route('/delete_dancer', methods=['POST'])
@@ -462,7 +465,13 @@ def select_dancer_edit():
     dancers = cursor.fetchall()
     cursor.close()
 
-    return render_template('selectEditDancer.html', dancers=dancers)
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM Piece")  # Fetch pieces
+    pieces = cursor.fetchall()
+    cursor.close()
+
+    return render_template('selectEditDancer.html', dancers=dancers, pieces=pieces)
 
 @app.route('/my_adjudications')
 def my_adjudications():
