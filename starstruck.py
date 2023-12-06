@@ -6,6 +6,7 @@ import pandas as pd
 import sqlite3
 import hashlib
 import logging
+import mysql.connector
 
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -561,3 +562,41 @@ def piece_details():
 if __name__ == '__main__':
     init_db() # initialize the database
     app.run(debug=True, port=5001)  # Runs on http://127.0.0.1:5000 by default
+
+
+# from flask import Flask, render_template, request, redirect, url_for, g, session, jsonify, flash
+# from werkzeug.security import generate_password_hash, check_password_hash
+# from datetime import datetime, time, timedelta
+# import pandas as pd
+# import mysql.connector
+# import hashlib
+# import logging
+
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# # Create Flask instance and set template holder
+# app = Flask(__name__, template_folder='templates')
+# app.secret_key = 'secretkey'
+# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
+
+# # MySQL database configuration
+# DB_CONFIG = {
+#     'user': 'your_username',
+#     'password': 'your_password',
+#     'host': 'localhost',  # or your MySQL server address
+#     'database': 'starstuck',
+#     'raise_on_warnings': True
+# }
+
+# # Set up database connection
+# def get_db():
+#     if 'db' not in g:
+#         g.db = mysql.connector.connect(**DB_CONFIG)
+#         g.db.autocommit = False
+#     return g.db
+
+# @app.teardown_appcontext
+# def close_connection(exception):
+#     db = g.pop('db', None)
+#     if db is not None:
+#         db.close()
