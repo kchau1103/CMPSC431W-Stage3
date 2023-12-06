@@ -40,12 +40,27 @@
     </nav>
 
  <body style = "background-color: rgb(0, 0, 0);">
+
+  <h1 style="color:rgb(255, 131, 208);">Enter Scores</h1>
+    <form action="{{ url_for('add_scores') }}" method="post" style="color:rgb(255, 255, 255);">
+      <label for="order_num">Order Number:</label>
+        <input type="number" id="order_num" name="order_num" required>
+
+        <label for="judge_id">Judge ID:</label>
+        <input type="number" id="judge_id" name="judge_id" required>
+
+        <label for="score">Score:</label>
+        <input type="number" id="score" name="score" min="0" max="100" required>
+        
+        <input type="submit" value="Submit Score" class="btn">
+    </form>
+
     <h1 style="color:rgb(255, 131, 208);">Judges Scores</h1>
     <table>
         <thead>
             <tr>
-                <th>Judge ID</th>
                 <th>Order Number</th>
+                <th>Judge ID</th>
                 <th>Score</th>
             </tr>
         </thead>
@@ -60,19 +75,25 @@
         </tbody>
     </table>
 
-    <h1 style="color:rgb(255, 131, 208);">Enter Scores</h1>
-    <form action="{{ url_for('add_scores') }}" method="post" style="color:rgb(255, 255, 255);">
-        <label for="judge_id">Judge ID:</label>
-        <input type="number" id="judge_id" name="judge_id" required>
-
-        <label for="order_num">Order Number:</label>
-        <input type="number" id="order_num" name="order_num" required>
-
-        <label for="score">Score:</label>
-        <input type="number" id="score" name="score" min="0" max="100" required>
-        
-        <input type="submit" value="Submit Score" class="btn">
-    </form>
+    <!-- <h1 style="color:rgb(255, 131, 208);">Final Adjudications</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Award Name</th>
+                <th>Order Number</th>
+                <th>Total Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for adjudication in adjudications %}
+            <tr>
+                <td>{{ adjudication[0] }}</td>
+                <td>{{ adjudication[1] }}</td>
+                <td>{{ adjudication[2] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table> -->
 </body>
 </html>
 

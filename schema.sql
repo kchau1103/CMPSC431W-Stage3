@@ -71,7 +71,7 @@ CREATE TABLE Judges_Score (
 DROP TABLE IF EXISTS Adjudication;
 -- Adjudication Table
 CREATE TABLE Adjudication (
-    award_name INTEGER PRIMARY KEY,
+    award_name TEXT PRIMARY KEY,
     order_num INTEGER,
     total_score DECIMAL(5, 2),
     FOREIGN KEY (order_num) REFERENCES Piece(order_num)

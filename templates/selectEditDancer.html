@@ -57,8 +57,8 @@
         </div>
     </section>
 
-  <h1>Select Dancer to Edit</h1>
-  <form action="{{ url_for('select_dancer_edit') }}" method="post">
+  <form action="{{ url_for('select_dancer_edit') }}" method="post" required>
+    <h1>Select Dancer to Edit</h1>
     <label for="dancer">Select Dancer:</label>
     <select name="dancer" id="dancer">
         {% for dancer in dancers %}
@@ -66,6 +66,25 @@
         {% endfor %}
     </select>
     <input type="submit" value="Edit Dancer">
-</form>
+    </form>
+
+    <form action="{{ url_for('select_delete_dancer') }}" method="post">
+        <h1>Select Dancer to Delete</h1>
+        <label for="dancer_to_delete">Dancer Name:</label>
+        <select name="dancer_to_delete" id="dancer_to_delete" required>
+            {% for dancer in dancers %}
+                <option value="{{ dancer[0] }}">{{ dancer[0] }}</option>
+            {% endfor %}
+        </select>
+    
+        <label for="ordernum_to_delete">Order Number of Piece:</label>
+        <select name="ordernum_to_delete" id="ordernum_to_delete" required>
+            {% for piece in pieces %}
+                <option value="{{ piece[0] }}">{{ piece[1] }} </option>
+            {% endfor %}
+        </select>
+    
+        <input type="submit" value="Delete Dancer">
+    </form>
 </body>
 </html>

@@ -61,32 +61,33 @@
           <tbody>
               {% for adjudication in adjudications %}
               <tr>
-                  <td>{{ adjudication.award_name }}</td>
-                  <td>{{ adjudication.order_num }}</td>
-                  <td>{{ adjudication.total_score }}</td>
+                  <td>{{ adjudication[0] }}</td>
+                  <td>{{ adjudication[1] }}</td>
+                  <td>{{ adjudication[2] }}</td>
               </tr>
               {% endfor %}
           </tbody>
       </table>
   </body>
   </html>
-  <style>
-    table {
-    width: 100%;
-    border-collapse: collapse;
-}
+  
+<style>
+  table {
+  width: 100%;
+  border-collapse: collapse;
+  }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    color: #ffffff;
-}
+  th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      color: #ffffff;
+  }
 
-th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: rgb(255, 128, 234);
-    color: white;
-}
-  </style>
+  th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: rgb(255, 128, 234);
+      color: white;
+  }
+</style>

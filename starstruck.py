@@ -71,20 +71,65 @@ def judges():
 
 @app.route('/add_scores', methods=['POST'])
 def add_scores():
-    # Get data from form
     judge_id = request.form['judge_id']
     order_num = request.form['order_num']
     score = request.form['score']
 
-    # Insert data into database
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("INSERT INTO Judges_Score (judge_id, order_num, score) VALUES (?, ?, ?)", (judge_id, order_num, score))
-    db.commit()
-    cursor.close()
+    try:
+        score = int(score)
+        if 0 <= score <= 100:
+            db = get_db()
+            cursor = db.cursor()
 
-    # Redirect back to judges page
-    return redirect(url_for('judges'))
+            # Check if this judge has already scored this order number
+            cursor.execute("SELECT COUNT(*) FROM Judges_Score WHERE order_num = ? AND judge_id = ?", (order_num, judge_id))
+            judge_count = cursor.fetchone()[0]
+
+            if judge_count > 0:
+                cursor.close()
+                return "This judge has already scored this order number.", 400
+
+            # Insert the new score
+            cursor.execute("INSERT INTO Judges_Score (judge_id, order_num, score) VALUES (?, ?, ?)", (judge_id, order_num, score))
+            db.commit()
+
+            # Check if there are now 3 scores from unique judges
+            cursor.execute("SELECT COUNT(DISTINCT judge_id) FROM Judges_Score WHERE order_num = ?", (order_num,))
+            total_judges = cursor.fetchone()[0]
+
+            if total_judges == 3:
+                # Calculate total score
+                cursor.execute("SELECT SUM(score) FROM Judges_Score WHERE order_num = ?", (order_num,))
+                total_score = cursor.fetchone()[0]
+                total_score = int(total_score)  # Ensure total_score is an integer
+
+                # Determine adjudication based on total score
+                if 291.0 <= total_score <= 300:
+                    award_name = "Platinum"
+                elif 282.0 <= total_score <= 290.9:
+                    award_name = "High Gold"
+                elif 273.0 <= total_score <= 281.9:
+                    award_name = "Gold"
+                elif 264.0 <= total_score <= 272.9:
+                    award_name = "Silver"
+                elif 255.0 <= total_score <= 263.9:
+                    award_name = "Bronze"
+                else:
+                    award_name = "Bronze"  # Default to "Bronze"
+                
+                award_name = str(award_name)
+                total_score = float(total_score)
+
+                # Update Adjudication table with award name and total score
+                cursor.execute("UPDATE Adjudication SET award_name = ?, total_score = ? WHERE order_num = ?", (award_name, total_score, order_num))
+                db.commit()
+
+            cursor.close()
+            return redirect(url_for('judges'))
+        else:
+            return "Score must be between 0 and 100", 400
+    except ValueError:
+        return "Invalid input for score", 400
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -185,17 +230,25 @@ def register_pieces():
         db = get_db()
         cursor = db.cursor()
 
+        cursor.execute("""
+            INSERT INTO Piece (studio_name, size_category, age_group, style, song) 
+            VALUES (?, ?, ?, ?, ?)
+            """, (studio_name, size_category, age_group, style, song))
+        db.commit()
+
+        order_num = cursor.lastrowid
+        order_num = int(order_num) 
+        cursor.execute("""
+            INSERT INTO Adjudication (order_num)
+            VALUES (?)
+            """, (order_num,))
+        db.commit()
+
         # Insert the payment entry into the Payment table
         cursor.execute("""
             INSERT INTO Payment (registration_status, studio_name, amount_due, paid, payment_status)
             VALUES (?, ?, ?, ?, ?)
             """, (registration_status, studio_name, amount_due, paid, payment_status))
-        db.commit()
-
-        cursor.execute("""
-            INSERT INTO Piece (studio_name, size_category, age_group, style, song) 
-            VALUES (?, ?, ?, ?, ?)
-            """, (studio_name, size_category, age_group, style, song))
         db.commit()
 
         duration_str = request.form.get('duration')  # Assuming 'duration' is in the format 'HH:MM:SS'
@@ -233,9 +286,9 @@ def register_pieces():
         for i in range(len(first_name)):
             full_name = first_name[i] + " " + last_name[i]
             cursor.execute("""
-                INSERT INTO Dancer (studio_name, name, age, gender) 
-                VALUES (?, ?, ?, ?)
-                """, (studio_name, full_name, age[i], gender[i]))
+                INSERT INTO Dancer (studio_name, name, age, gender, order_num) 
+                VALUES (?, ?, ?, ?, ?)
+                """, (studio_name, full_name, age[i], gender[i], order_num))
         db.commit()
 
         cursor.execute("""
@@ -339,6 +392,39 @@ def my_dancers():
     cursor.execute("SELECT * FROM Dancer WHERE studio_name = ?", (studio_name,))
     dancers = cursor.fetchall()  # Fetches all rows from the Dancer table
     return render_template('myDancers.html', dancers=dancers)
+
+# Route to display the form for deleting dancers
+@app.route('/select_delete_dancer', methods=['GET', 'POST'])
+def select_delete_dancer():
+    studio_name = session.get('studio_name')
+    if studio_name is None:
+        return redirect(url_for('login'))
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT name FROM Dancer WHERE studio_name = ?", (studio_name,))
+    dancers = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM Piece")  # Fetch pieces
+    pieces = cursor.fetchall()
+    cursor.close()
+
+    return render_template('myDancers.html', dancers=dancers, pieces=pieces)
+
+# Route to handle the deletion of dancers
+@app.route('/delete_dancer', methods=['POST'])
+def delete_dancer():
+    dancer_to_delete = request.form['dancer_to_delete']
+    piece_to_delete = request.form['ordernum_to_delete']
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM Dancer WHERE name = ? AND order_num = ?", (dancer_to_delete, piece_to_delete))
+    db.commit()
+    cursor.close()
+
+    flash('Dancer successfully deleted from the piece!', 'success')
+    return redirect(url_for('select_delete_dancer'))
 
 @app.route('/edit_dancers', methods=['GET', 'POST'])
 def edit_dancers():
