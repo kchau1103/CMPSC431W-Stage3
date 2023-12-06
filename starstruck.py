@@ -81,67 +81,42 @@ def add_scores():
             db = get_db()
             cursor = db.cursor()
 
+            # Start a transaction
+            cursor.execute("BEGIN;")
+
+            # Check if the order number exists
+            cursor.execute("SELECT COUNT(*) FROM Piece WHERE order_num = ?", (order_num,))
+            if cursor.fetchone()[0] == 0:
+                db.rollback()  # Rollback if order number does not exist
+                flash('Order number does not exist.', 'error')
+                return redirect(url_for('judges'))
+
             # Check if this judge has already scored this order number
             cursor.execute("SELECT COUNT(*) FROM Judges_Score WHERE order_num = ? AND judge_id = ?", (order_num, judge_id))
-            judge_count = cursor.fetchone()[0]
-
-            if judge_count > 0:
-                cursor.close()
-                return "This judge has already scored this order number.", 400
+            if cursor.fetchone()[0] > 0:
+                db.rollback()
+                flash('This judge has already scored this order number.', 'error')
+                return redirect(url_for('judges'))
 
             # Check the total number of scores for this order number
             cursor.execute("SELECT COUNT(*) FROM Judges_Score WHERE order_num = ?", (order_num,))
-            total_scores = cursor.fetchone()[0]
-
-            if total_scores >= 3:
-                cursor.close()
-                return "This order number already has 3 scores.", 400
+            if cursor.fetchone()[0] >= 3:
+                db.rollback()
+                flash('This order number already has 3 scores.', 'error')
+                return redirect(url_for('judges'))
 
             # Insert the new score
             cursor.execute("INSERT INTO Judges_Score (judge_id, order_num, score) VALUES (?, ?, ?)", (judge_id, order_num, score))
+
+            # Commit the transaction if all checks pass
             db.commit()
-
-            # Check if there are now 3 scores from unique judges
-            cursor.execute("SELECT COUNT(DISTINCT judge_id) FROM Judges_Score WHERE order_num = ?", (order_num,))
-            total_judges = cursor.fetchone()[0]
-
-            if total_judges == 3:
-                # Calculate total score
-                cursor.execute("SELECT SUM(score) FROM Judges_Score WHERE order_num = ?", (order_num,))
-                total_score = cursor.fetchone()[0]
-                total_score = int(total_score)  # Ensure total_score is an integer
-
-                # Determine adjudication based on total score
-                if 291.0 <= total_score <= 300:
-                    award_name = "Platinum"
-                elif 282.0 <= total_score <= 290.9:
-                    award_name = "High Gold"
-                elif 273.0 <= total_score <= 281.9:
-                    award_name = "Gold"
-                elif 264.0 <= total_score <= 272.9:
-                    award_name = "Silver"
-                elif 255.0 <= total_score <= 263.9:
-                    award_name = "Bronze"
-                else:
-                    award_name = "Bronze"  # Default to "Bronze"
-                
-                award_name = str(award_name)
-                total_score = float(total_score)
-
-                # Update Adjudication table with award name and total score
-                cursor.execute("UPDATE Adjudication SET award_name = ?, total_score = ? WHERE order_num = ?", (award_name, total_score, order_num))
-                db.commit()
-
-                # Update Piece table with the same award name
-                cursor.execute("UPDATE Piece SET award_name = ? WHERE order_num = ?", (award_name, order_num))
-                db.commit()
-
-            cursor.close()
-            return redirect(url_for('judges'))
+            flash('Score added successfully.', 'success')
         else:
-            return "Score must be between 0 and 100", 400
+            flash('Score must be between 0 and 100.', 'error')
     except ValueError:
-        return "Invalid input for score", 400
+        flash('Invalid input for score.', 'error')
+
+    return redirect(url_for('judges'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
