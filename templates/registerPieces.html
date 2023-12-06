@@ -36,6 +36,24 @@
         padding: 8px;
         margin-bottom: 10px; /* Spacing below each input field */
       }
+      #flash-messages .alert {
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+
+    .alert-error {
+        background-color: #000000;
+        border-color: #000000;
+        color: #ffffff;
+    }
+
+    .alert-success {
+        background-color: #000000;
+        border-color: #000000;
+        color: #ffffff;
+    }
       </style>
   </head>
 
@@ -62,6 +80,16 @@
       <p><a href="/login_choices">Back to My Information </a>.</p>
     </div>
   </section>
+
+  <div id="flash-messages">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
 
   <section>
     <form action="{{ url_for('register_pieces') }}" method="post">
@@ -105,10 +133,10 @@
 
     <h1 style="color:rgb(255, 131, 208);">Dancers:</h1>
     <table id="peopleTable" style="color:rgb(255, 255, 255); margin-bottom: 20px;">
-      <tr>
+      <!-- <tr>
         <td><label for="numDancers" style="font-size: 18px;"><b>Number of Dancers:</b></label></td>
         <td><input type="number" name="numDancers" style="font-size: 16px; width: 50%;" min="0" required></td>
-      </tr>
+      </tr> -->
         <td><label for="fname" style="font-size: 18px;"><b>First Name:</b></label></td>
         <td><input type="text" name="fname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required></td>
 
@@ -127,50 +155,85 @@
           </select>
         </td>
       </tr>
+      <input type="hidden" name="numDancers" id="numDancers" value="0">
     </table>
 
     <button type="button" onclick="addPerson()" style="font-size: 18px;">Add Person</button>
     <br><br>
     <button type="submit" style="font-size: 18px;">Submit</button>
-
+  </section>
   </form>
     
   <script>
-    function addPerson() {
-      const table = document.getElementById("peopleTable");
-      const newRow = table.insertRow(-1);
-      
-      const cell1 = newRow.insertCell(0);
-      const cell2 = newRow.insertCell(1);
-      const cell3 = newRow.insertCell(2);
-      const cell4 = newRow.insertCell(3);
-      const cell5 = newRow.insertCell(4);
-      const cell6 = newRow.insertCell(5);
-      const cell7 = newRow.insertCell(6);
-      const cell8 = newRow.insertCell(7);
-      
-      cell1.innerHTML = '<label for="fname" style="font-size: 18px;"><b>First Name:</b></label>';
-      cell2.innerHTML = '<input type="text" name="fname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required>';
-      cell3.innerHTML = '<label for="lname" style="font-size: 18px;"><b>Last Name:</b></label>';
-      cell4.innerHTML = '<input type="text" name="lname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required>';
-      cell5.innerHTML = '<label for="age" style="font-size: 18px;"><b>Age:</b></label>';
-      cell6.innerHTML = '<input type="number" name="age[]" style="font-size: 16px; width: 50%;" required>';
-      cell7.innerHTML = '<label for="gender" style="font-size: 18px;"><b>Gender:</b></label>';
-      cell8.innerHTML = `
-        <select name="gender[]" style="font-size: 16px; width: 100%;">
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>`;
 
-        // Add a cell for the remove button
-        const removeCell = newRow.insertCell(-1);
-        removeCell.innerHTML = '<button type="button" onclick="removePerson(this)" style="font-size: 16px;">Remove</button>';
+  function updateDancerCount() {
+    // Count the number of dancer rows (excluding the header row)
+    const count = document.querySelectorAll('#peopleTable tr').length;
+    document.getElementById('numDancers').value = count;
+  }
+  function addPerson() {
+    const table = document.getElementById("peopleTable");
+    const newRow = table.insertRow(-1);
+    
+    const cell1 = newRow.insertCell(0);
+    const cell2 = newRow.insertCell(1);
+    const cell3 = newRow.insertCell(2);
+    const cell4 = newRow.insertCell(3);
+    const cell5 = newRow.insertCell(4);
+    const cell6 = newRow.insertCell(5);
+    const cell7 = newRow.insertCell(6);
+    const cell8 = newRow.insertCell(7);
+    
+    cell1.innerHTML = '<label for="fname" style="font-size: 18px;"><b>First Name:</b></label>';
+    cell2.innerHTML = '<input type="text" name="fname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required>';
+    cell3.innerHTML = '<label for="lname" style="font-size: 18px;"><b>Last Name:</b></label>';
+    cell4.innerHTML = '<input type="text" name="lname[]" style="font-size: 16px; width: 80%; margin-right: 70px;" required>';
+    cell5.innerHTML = '<label for="age" style="font-size: 18px;"><b>Age:</b></label>';
+    cell6.innerHTML = '<input type="number" name="age[]" style="font-size: 16px; width: 50%;" required>';
+    cell7.innerHTML = '<label for="gender" style="font-size: 18px;"><b>Gender:</b></label>';
+    cell8.innerHTML = `
+      <select name="gender[]" style="font-size: 16px; width: 100%;">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other</option>
+      </select>`;
+
+      // Add a cell for the remove button
+      const removeCell = newRow.insertCell(-1);
+      removeCell.innerHTML = '<button type="button" onclick="removePerson(this)" style="font-size: 16px;">Remove</button>';
+      updateDancerCount(); // Update the dancer count
     }
 
-    function removePerson(button) {
-      const row = button.parentNode.parentNode; // button -> td -> tr
-      row.parentNode.removeChild(row);
+  function removePerson(button) {
+    const row = button.parentNode.parentNode; // button -> td -> tr
+    row.parentNode.removeChild(row);
+    updateDancerCount(); // Update the dancer count
+  }
+  function validateAge() {
+  const ageGroup = document.querySelector('input[name="ageGroup"]:checked').value;
+  const ages = document.querySelectorAll('input[name="age[]"]');
+  let isValid = true;
+
+  ages.forEach(ageInput => {
+    const age = parseInt(ageInput.value);
+    if (ageGroup === '8-10' && (age < 8 || age > 10)) {
+      isValid = false;
+    } else if (ageGroup === '11-12' && (age < 11 || age > 12)) {
+      isValid = false;
+    } // Add similar conditions for other age groups
+
+    if (!isValid) {
+      alert('Age ' + age + ' is not within the selected age group ' + ageGroup);
+      return false;
     }
+  });
+
+  return isValid;
+}
+
+document.getElementById('piecesForm').addEventListener('submit', function(event) {
+  if (!validateAge()) {
+    event.preventDefault(); // Prevent form submission
+  }
+});
   </script>
-</section>

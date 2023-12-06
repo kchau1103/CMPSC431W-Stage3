@@ -38,11 +38,11 @@ def init_db():
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         
-        # # Execute preset data script
-        # with app.open_resource('preset_data.sql', mode='r') as f:
-        #     db.cursor().executescript(f.read())
+        # Execute preset data script
+        with app.open_resource('preset_data.sql', mode='r') as f:
+            db.cursor().executescript(f.read())
 
-        # db.commit()
+        db.commit()
 
 @app.route('/success')
 def success():
@@ -159,12 +159,22 @@ def register_studio():
         # Insert data into the database
         db = get_db()
         cursor = db.cursor()
-        # Make sure your SQL query matches the database schema
+        # Check if the studio name already exists
+        cursor.execute("SELECT * FROM Studio WHERE studio_name = ?", (studio_name,))
+        existing_studio = cursor.fetchone()
+
+        if existing_studio:
+            # Studio name already exists, flash an error message
+            flash('Studio name already taken. Please choose a different name.', 'error')
+            return redirect(url_for('register_studio'))
+
+        # If studio name doesn't exist, insert the new studio
         cursor.execute("INSERT INTO Studio (studio_name, state, city) VALUES (?, ?, ?)", (studio_name, state, city))
         db.commit()
         cursor.close()
 
         # Redirect to the success page after successful form submission
+        flash('Studio registered successfully!', 'success')
         return redirect(url_for('success'))
 
     # Render the form page for GET request
@@ -199,13 +209,27 @@ def register_pieces():
         last_name = request.form.getlist('lname[]')
         age = request.form.getlist('age[]')
         gender = request.form.getlist('gender[]')
-        num_dancers = request.form.get('numDancers')
         registration_status = "Registered"
+
+        # Retrieve the number of dancers from the hidden input
+        num_dancers = request.form.get('numDancers')
 
         studio_name = session.get('studio_name')
         if studio_name is None:
             return redirect(url_for('login'))
+        age_group = request.form['ageGroup']
 
+        valid_age_ranges = {
+            '8-10': range(8, 11),
+            '11-12': range(11, 13),
+            # Add other age groups
+        }
+
+        for a1 in age:
+            if int(a1) not in valid_age_ranges[age_group]:
+                flash(f'Age {a1} is not within the selected age group {age_group}.', 'error')
+                return redirect(url_for('register_pieces'))
+        
         if age:
             int_ages = [int(a) for a in age if a.isdigit()]
             avg_age = sum(int_ages) / len(int_ages) if int_ages else 0

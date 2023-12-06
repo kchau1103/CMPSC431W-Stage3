@@ -57,13 +57,13 @@
           <div class="column" style="flex: 1;">
             <form action="contact" style="margin-left: 20px;">
               <label for="fname">First Name</label>
-              <input type="text" id="fname" name="firstname" placeholder="Your name.." style="width: 100%; margin-bottom: 10px;">
+              <input type="text" id="fname" name="firstname" placeholder="Your name.." style="width: 100%; margin-bottom: 10px;" required>
               
               <label for="lname">Last Name</label>
-              <input type="text" id="lname" name="lastname" placeholder="Your last name.." style="width: 100%; margin-bottom: 10px;">
+              <input type="text" id="lname" name="lastname" placeholder="Your last name.." style="width: 100%; margin-bottom: 10px;" required>
               
               <label for="state">State</label>
-              <select id="state" name="state" style="width: 100%; margin-bottom: 10px;">
+              <select id="state" name="state" style="width: 100%; margin-bottom: 10px;" required>
                 <option value="alabama">Alabama</option>
                 <option value="alaksa">Alaska</option>
                 <option value="arizona">Arizona</option>
@@ -99,7 +99,7 @@
               </select>
               
               <label for="subject">Subject</label>
-              <textarea id="subject" name="subject" placeholder="Write something.." style="width: 100%; height: 170px; margin-bottom: 10px;"></textarea>
+              <textarea id="subject" name="subject" placeholder="Write something.." style="width: 100%; height: 170px; margin-bottom: 10px;" required></textarea>
               
               <input type="submit" value="Submit" style="width: 100%;">
             </form>

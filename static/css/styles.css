@@ -81,3 +81,20 @@ nav ul li{
     cursor: pointer;
     display: none;
   }
+  .flash-message {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: white; /* Setting the font color to white */
+}
+
+.flash-message.alert-error {
+    background-color: #000000;
+    border-color: #ebccd1;
+}
+
+.flash-message.alert-success {
+    background-color: #000000;
+    border-color: #d6e9c6;
+}

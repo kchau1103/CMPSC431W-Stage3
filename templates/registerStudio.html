@@ -21,6 +21,24 @@
       h1 {
         font-size: 48px; /* Adjust the font size to your preference */
       }
+      .flash-message {
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid transparent;
+      border-radius: 4px;
+    }
+
+    .flash-message.alert-error {
+        background-color: #000000;
+        border-color: #000000;
+        color: #ffffff;
+    }
+
+    .flash-message.alert-success {
+        background-color: #dff0d8;
+        border-color: #000000;
+        color: #ffffff;
+   }
     </style>
   </head>
 
@@ -42,7 +60,19 @@
       </ul>
     </nav>
 
+
+  </div>
   <section>
+    <!-- Flash Messages -->
+    <div id="flash-messages">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+              {% for category, message in messages %}
+                  <div class="flash-message {{ category }}">{{ message }}</div>
+              {% endfor %}
+          {% endif %}
+      {% endwith %}
+      
     <form action="/register_studio" method="post">
       <div class="container" style="color:rgb(255, 255, 255);">
         <h1 style="color:rgb(255, 131, 208);">Register Studio</h1>
