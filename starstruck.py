@@ -1,49 +1,126 @@
-#import modules
+# #import modules
+# from flask import Flask, render_template, request, redirect, url_for, g, session, jsonify, flash
+# from werkzeug.security import generate_password_hash, check_password_hash
+# from datetime import datetime, time, timedelta
+# import pandas as pd
+# import sqlite3
+# import hashlib
+# import logging
+# import mysql.connector
+
+
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# #create Flask instance and set template holder
+# app = Flask(__name__, template_folder='templates')
+# app.secret_key = 'secretkey'
+# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
+
+# #set host
+# host = 'http://127.0.0.1:5001/'
+
+# DATABASE = 'starstuck.db'
+# #set up database
+# def get_db():
+#     db = getattr(g, '_database', None)
+#     if db is None:
+#         db = g._database = sqlite3.connect(DATABASE)
+#     return db
+
+# @app.teardown_appcontext
+# def close_connection(exception):
+#     db = getattr(g, '_database', None)
+#     if db is not None:
+#         db.close()
+
 from flask import Flask, render_template, request, redirect, url_for, g, session, jsonify, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, time, timedelta
 import pandas as pd
-import sqlite3
+import mysql.connector
 import hashlib
 import logging
-import mysql.connector
-
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-#create Flask instance and set template holder
+# Create Flask instance and set template holder
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'secretkey'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
 
-#set host
-host = 'http://127.0.0.1:5001/'
+# MySQL database configuration
+DB_CONFIG = {
+    'user': 'sqluser',
+    'password': 'password',
+    'host': 'localhost',  # or your MySQL server address
+    'database': 'starstruck_db',
+    'raise_on_warnings': True
+}
 
-DATABASE = 'starstuck.db'
-#set up database
+# Set up database connection
 def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-    return db
+    if 'db' not in g:
+        g.db = mysql.connector.connect(**DB_CONFIG)
+        g.db.autocommit = False
+    return g.db
 
 @app.teardown_appcontext
 def close_connection(exception):
-    db = getattr(g, '_database', None)
+    db = g.pop('db', None)
     if db is not None:
         db.close()
 
 def init_db():
     with app.app_context():
-        db = get_db()
-        with app.open_resource('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        
-        # Execute preset data script
-        with app.open_resource('preset_data.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
+        # Initial connection to check if database exists
+        db = mysql.connector.connect(
+            user=DB_CONFIG['user'], 
+            password=DB_CONFIG['password'], 
+            host=DB_CONFIG['host']
+        )
+        cursor = db.cursor()
+        cursor.execute("SHOW DATABASES LIKE 'starstruck_db';")
+        result = cursor.fetchone()
+        if not result:
+            cursor.execute("CREATE DATABASE starstruck_db;")
+            db.commit()
 
-        db.commit()
+        cursor.close()
+        db.close()
+
+        # Connect to the database and execute schema.sql
+        db = get_db()
+        cursor = db.cursor()
+        try:
+            with app.open_resource('schema.sql', mode='r') as f:
+                sql_script = f.read()
+                statements = sql_script.split(';')
+                for statement in statements:
+                    if statement.strip():
+                        print("Executing statement:", statement)
+                        cursor.execute(statement)
+                db.commit()
+        except mysql.connector.Error as err:
+            print("Error occurred:", err)
+            db.rollback()
+        finally:
+            cursor.close()
+
+        # Connect to the database and execute preset_data.sql
+        db = get_db()
+        cursor = db.cursor()
+        try:
+            with app.open_resource('preset_data.sql', mode='r') as f:
+                sql_script = f.read()
+                for statement in sql_script.split(';'):
+                    if statement.strip():
+                        cursor.execute(statement)
+                db.commit()
+        except mysql.connector.Error as err:
+            print("Error occurred:", err)
+            db.rollback()
+        finally:
+            cursor.close()
 
 @app.route('/success')
 def success():
@@ -90,28 +167,28 @@ def add_scores():
             cursor.execute("BEGIN;")
 
             # Check if the order number exists
-            cursor.execute("SELECT COUNT(*) FROM Piece WHERE order_num = ?", (order_num,))
+            cursor.execute("SELECT COUNT(*) FROM Piece WHERE order_num = %s", (order_num,))
             if cursor.fetchone()[0] == 0:
                 db.rollback()  # Rollback if order number does not exist
                 flash('Order number does not exist.', 'error')
                 return redirect(url_for('judges'))
 
             # Check if this judge has already scored this order number
-            cursor.execute("SELECT COUNT(*) FROM Judges_Score WHERE order_num = ? AND judge_id = ?", (order_num, judge_id))
+            cursor.execute("SELECT COUNT(*) FROM Judges_Score WHERE order_num = ? AND judge_id = %s", (order_num, judge_id))
             if cursor.fetchone()[0] > 0:
                 db.rollback()
                 flash('This judge has already scored this order number.', 'error')
                 return redirect(url_for('judges'))
 
             # Check the total number of scores for this order number
-            cursor.execute("SELECT COUNT(*) FROM Judges_Score WHERE order_num = ?", (order_num,))
+            cursor.execute("SELECT COUNT(*) FROM Judges_Score WHERE order_num = %s", (order_num,))
             if cursor.fetchone()[0] >= 3:
                 db.rollback()
                 flash('This order number already has 3 scores.', 'error')
                 return redirect(url_for('judges'))
 
             # Insert the new score
-            cursor.execute("INSERT INTO Judges_Score (judge_id, order_num, score) VALUES (?, ?, ?)", (judge_id, order_num, score))
+            cursor.execute("INSERT INTO Judges_Score (judge_id, order_num, score) VALUES (%s,%s,%s)", (judge_id, order_num, score))
 
             # Commit the transaction if all checks pass
             db.commit()
@@ -130,7 +207,7 @@ def login():
 
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("SELECT * FROM Studio WHERE studio_name = ?", (studio_name,))
+        cursor.execute("SELECT * FROM Studio WHERE studio_name = %s", (studio_name,))
         studio = cursor.fetchone()
 
         if studio:
@@ -161,7 +238,7 @@ def register_studio():
         db = get_db()
         cursor = db.cursor()
         # Check if the studio name already exists
-        cursor.execute("SELECT * FROM Studio WHERE studio_name = ?", (studio_name,))
+        cursor.execute("SELECT * FROM Studio WHERE studio_name = %s", (studio_name,))
         existing_studio = cursor.fetchone()
 
         if existing_studio:
@@ -170,7 +247,7 @@ def register_studio():
             return redirect(url_for('register_studio'))
 
         # If studio name doesn't exist, insert the new studio
-        cursor.execute("INSERT INTO Studio (studio_name, state, city) VALUES (?, ?, ?)", (studio_name, state, city))
+        cursor.execute("INSERT INTO Studio (studio_name, state, city) VALUES (%s,%s,%s)", (studio_name, state, city))
         db.commit()
         cursor.close()
 
@@ -257,7 +334,7 @@ def register_pieces():
 
         cursor.execute("""
             INSERT INTO Piece (studio_name, size_category, age_group, style, song) 
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s,%s,%s,%s,%s)
             """, (studio_name, size_category, age_group, style, song))
         db.commit()
 
@@ -265,14 +342,14 @@ def register_pieces():
         order_num = int(order_num) 
         cursor.execute("""
             INSERT INTO Adjudication (order_num)
-            VALUES (?)
+            VALUES (%s)
             """, (order_num,))
         db.commit()
 
         # Insert the payment entry into the Payment table
         cursor.execute("""
             INSERT INTO Payment (registration_status, studio_name, amount_due, paid, payment_status)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s,%s,%s,%s,%s)
             """, (registration_status, studio_name, amount_due, paid, payment_status))
         db.commit()
 
@@ -280,13 +357,13 @@ def register_pieces():
             full_name = first_name[i] + " " + last_name[i]
             cursor.execute("""
                 INSERT INTO Dancer (studio_name, name, age, gender, order_num) 
-                VALUES (?, ?, ?, ?, ?)
+                VALUES (%s,%s,%s,%s,%s)
                 """, (studio_name, full_name, age[i], gender[i], order_num))
         db.commit()
 
         cursor.execute("""
             INSERT INTO Set_List (studio_name, num_dancers, style, registration_status, song_duration, avg_age, song)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s,%s,%s,%s,%s,%s,%s)
             """, (studio_name, num_dancers, style, registration_status, duration, avg_age, song))
        
         db.commit()
@@ -317,7 +394,7 @@ def add_payment():
     cursor = db.cursor()
 
     try:
-        cursor.execute("SELECT amount_due, paid FROM Payment WHERE payment_id = ? AND studio_name = ?", (payment_id, studio_name))
+        cursor.execute("SELECT amount_due, paid FROM Payment WHERE payment_id = %s AND studio_name = %s", (payment_id, studio_name))
         result = cursor.fetchone()
 
         if result:
@@ -335,12 +412,12 @@ def add_payment():
         payment_status = "Paid" if paid_status else "Pending"
 
         # Update Payment table
-        cursor.execute("UPDATE Payment SET amount_due = ?, paid = ?, payment_status = ?, registration_status = ? WHERE payment_id = ?", 
+        cursor.execute("UPDATE Payment SET amount_due = %s, paid = %s, payment_status = %s, registration_status = %s WHERE payment_id = %s", 
                     (new_amount_due, paid_status, payment_status, paid_status, payment_id))
 
         if paid_status:
             # Fetch the song details for scheduling
-            cursor.execute("SELECT song, song_duration FROM Set_List WHERE studio_name = ? AND registration_status = 'Registered'", (studio_name,))
+            cursor.execute("SELECT song, song_duration FROM Set_List WHERE studio_name = %s AND registration_status = 'Registered'", (studio_name,))
             songs_to_schedule = cursor.fetchall()
 
             # Get the last call time for the current date
@@ -361,10 +438,10 @@ def add_payment():
                     next_call_time_str = next_call_time.time().strftime('%H:%M:%S')
 
                     # Insert into Schedule table
-                    cursor.execute("INSERT INTO Schedule (date, call_time, song) VALUES (CURRENT_DATE, ?, ?)", (next_call_time_str, song_name))
+                    cursor.execute("INSERT INTO Schedule (date, call_time, song) VALUES (CURRENT_DATE, %s, %s)", (next_call_time_str, song_name))
              
             # Optionally, update registration status in Set_List table if payment is completed
-            cursor.execute("UPDATE Set_List SET registration_status = TRUE WHERE studio_name = ?", (studio_name,))
+            cursor.execute("UPDATE Set_List SET registration_status = TRUE WHERE studio_name = %s", (studio_name,))
 
             # Commit the transaction after all updates
             db.commit()
@@ -392,7 +469,7 @@ def my_payments():
     cursor = db.cursor()
 
     # Fetch all payments for the studio
-    cursor.execute("SELECT * FROM Payment WHERE studio_name = ?", (studio_name,))
+    cursor.execute("SELECT * FROM Payment WHERE studio_name = %s", (studio_name,))
     payments = cursor.fetchall()
     cursor.close()
     print(payments)
@@ -416,7 +493,7 @@ def my_pieces():
         return redirect(url_for('login'))  # Redirect to login if studio name is not in session
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM Piece WHERE studio_name = ?", (studio_name,))
+    cursor.execute("SELECT * FROM Piece WHERE studio_name = %s", (studio_name,))
     pieces = cursor.fetchall()
     return render_template('myPieces.html', pieces=pieces)
 
@@ -427,7 +504,7 @@ def my_dancers():
         return redirect(url_for('login'))  # Redirect to login if studio name is not in session
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM Dancer WHERE studio_name = ?", (studio_name,))
+    cursor.execute("SELECT * FROM Dancer WHERE studio_name = %s", (studio_name,))
     dancers = cursor.fetchall()  # Fetches all rows from the Dancer table
     return render_template('myDancers.html', dancers=dancers)
 
@@ -440,7 +517,7 @@ def select_delete_dancer():
 
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT name FROM Dancer WHERE studio_name = ?", (studio_name,))
+    cursor.execute("SELECT name FROM Dancer WHERE studio_name = %s", (studio_name,))
     dancers = cursor.fetchall()
     cursor.close()
 
@@ -460,7 +537,7 @@ def delete_dancer():
 
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("DELETE FROM Dancer WHERE name = ? AND order_num = ?", (dancer_to_delete, piece_to_delete))
+    cursor.execute("DELETE FROM Dancer WHERE name = %s AND order_num = %s", (dancer_to_delete, piece_to_delete))
     db.commit()
     cursor.close()
 
@@ -476,7 +553,7 @@ def edit_dancers():
     if request.method == 'POST':
         new_age = request.form.get('age')
         new_gender = request.form.get('gender')
-        cursor.execute("UPDATE Dancer SET age = ?, gender = ? WHERE name = ?", (new_age, new_gender, dancer_name))
+        cursor.execute("UPDATE Dancer SET age = %s, gender = %s WHERE name = %s", (new_age, new_gender, dancer_name))
         db.commit()
         return redirect(url_for('success'))
 
@@ -581,8 +658,8 @@ if __name__ == '__main__':
 
 # # MySQL database configuration
 # DB_CONFIG = {
-#     'user': 'your_username',
-#     'password': 'your_password',
+#     'user': 'root',
+#     'password': 'password',
 #     'host': 'localhost',  # or your MySQL server address
 #     'database': 'starstuck',
 #     'raise_on_warnings': True
